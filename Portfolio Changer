@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>포트폴리오 기록 관리</title>
+<title>자기소개서 포트폴리오 관리</title>
 <style>
 :root{
   color-scheme:light;
@@ -22,6 +22,13 @@
 body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
 .container{max-width:1040px;margin:0 auto;padding:28px 18px 40px}
 h1{text-align:center;margin:0 0 22px;font-size:28px}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.tab-button{background:#e5e7eb;color:#343942;border:1px solid #d1d5db}
+.tab-button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.section-title h2{margin:0;font-size:20px}
 .input-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin-bottom:18px}
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .full{grid-column:1/-1}
@@ -64,9 +71,44 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .keyword-list{display:flex;gap:6px;flex-wrap:wrap}
 .keyword{background:#dbeafe;color:#1e3a8a;border-radius:999px;padding:5px 9px;font-size:13px;font-weight:700}
 .sentence{margin:10px 0 0;color:#343942;line-height:1.6;font-size:14px}
+.visual-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin:0 0 18px}
+.visual-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.visual-head h2{margin:0;font-size:20px}
+.visual-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.visual-panel{border:1px solid var(--line);border-radius:8px;padding:14px;background:#fafafa;min-height:170px}
+.visual-panel h3{margin:0 0 12px;font-size:16px}
+.stat-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stat-card{background:#eef2ff;border:1px solid #d9e0ff;border-radius:8px;padding:12px}
+.stat-value{display:block;font-size:24px;font-weight:800;color:#1d4ed8;line-height:1}
+.stat-label{display:block;margin-top:6px;font-size:12px;color:#4b5563}
+.bar-list{display:flex;flex-direction:column;gap:9px}
+.bar-label{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px;font-size:13px;color:#343942}
+.bar-track{height:12px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#14b8a6)}
+.skill-cloud{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;min-height:100px}
+.skill-bubble{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#ecfeff;color:#155e75;border:1px solid #a5f3fc;font-weight:800;line-height:1;padding:8px 10px}
+.timeline{display:flex;flex-direction:column;gap:10px}
+.timeline-item{display:grid;grid-template-columns:minmax(86px,130px) 1fr;gap:10px;align-items:center}
+.timeline-title{font-size:13px;color:#343942;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timeline-track{height:18px;background:#e5e7eb;border-radius:999px;overflow:hidden;position:relative}
+.timeline-fill{position:absolute;top:0;bottom:0;min-width:8px;border-radius:999px;background:#10b981}
+.profile-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.profile-item{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px}
+.profile-item strong{display:block;margin-bottom:4px;font-size:12px;color:#4b5563}
+.experience-list{display:flex;flex-direction:column;gap:10px}
+.outline-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin:18px 0 0}
+.outline-list{display:flex;flex-direction:column;gap:10px}
+.outline-item{border:1px solid var(--line);border-radius:8px;background:#fafafa;padding:14px}
+.outline-item h3{margin:0 0 8px;font-size:16px}
+.outline-item p{margin:0;color:#343942;line-height:1.6}
 @media (max-width:640px){
+  .tabs{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
   .analysis-grid{grid-template-columns:1fr}
+  .visual-grid{grid-template-columns:1fr}
+  .stat-row{grid-template-columns:1fr}
+  .timeline-item{grid-template-columns:1fr}
+  .profile-summary{grid-template-columns:1fr}
   .toolbar select{max-width:none}
   .card h3{padding-right:0;margin-top:38px}
   .actions{left:12px;right:auto}
@@ -75,8 +117,35 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 </head>
 <body>
 <main class="container">
-  <h1>포트폴리오 기록 관리</h1>
+  <h1>자기소개서 포트폴리오 관리</h1>
 
+  <nav class="tabs" aria-label="기록 탭">
+    <button type="button" class="tab-button active" data-tab="profile" onclick="switchTab('profile')">인적사항</button>
+    <button type="button" class="tab-button" data-tab="portfolio" onclick="switchTab('portfolio')">포트폴리오</button>
+    <button type="button" class="tab-button" data-tab="experience" onclick="switchTab('experience')">자유경험</button>
+  </nav>
+
+  <section id="tab-profile" class="tab-panel active" aria-label="인적사항">
+    <section class="input-box">
+      <div class="section-title">
+        <h2>인적사항</h2>
+        <button type="button" onclick="saveProfile()">저장</button>
+      </div>
+      <div class="form-grid">
+        <input id="profileName" placeholder="이름" autocomplete="off">
+        <input id="profileBirth" type="date" aria-label="생년월일">
+        <input id="profileEducation" placeholder="학력" autocomplete="off">
+        <input id="profileMajor" placeholder="전공 / 관심 분야" autocomplete="off">
+        <input id="profileEmail" placeholder="이메일" autocomplete="off">
+        <input id="profilePhone" placeholder="연락처" autocomplete="off">
+        <input id="profileTarget" class="full" placeholder="희망 직무 / 지원 분야" autocomplete="off">
+        <textarea id="profileNote" class="full" placeholder="성향, 가치관, 자기소개에 꼭 넣고 싶은 정보"></textarea>
+      </div>
+      <div id="profileSummary" class="profile-summary"></div>
+    </section>
+  </section>
+
+  <section id="tab-portfolio" class="tab-panel" aria-label="포트폴리오">
   <section class="input-box" aria-label="포트폴리오 기록 입력">
     <p class="notice" id="formStatus">새 기록을 추가하는 중입니다.</p>
     <div class="form-grid">
@@ -98,3 +167,1027 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
     <div class="toolbar" style="margin:12px 0 0">
       <button type="button" id="saveButton" onclick="add()">추가</button>
       <button type="button" class="dark" onclick="resetForm()">취소</button>
+    </div>
+  </section>
+
+  <section class="toolbar" aria-label="검색 및 필터">
+    <input id="search" placeholder="검색" oninput="render()">
+    <select id="filter" onchange="render()">
+      <option value="all">전체</option>
+      <option value="영상">영상</option>
+      <option value="대외활동">대외활동</option>
+      <option value="알바">알바</option>
+      <option value="학업">학업</option>
+      <option value="important">중요만</option>
+    </select>
+    <button type="button" onclick="showPortfolio()">포트폴리오 보기</button>
+    <button type="button" class="dark" onclick="analyzePortfolio()">AI 분석</button>
+  </section>
+
+  <section class="analysis-box" aria-label="AI 포트폴리오 분석">
+    <div class="analysis-head">
+      <h2>AI 포트폴리오 분석</h2>
+      <button type="button" onclick="analyzePortfolio()">다시 분석</button>
+    </div>
+    <div id="analysisResult" class="empty">기록을 추가한 뒤 AI 분석을 눌러 직무와 자기소개 키워드를 추천받아 보세요.</div>
+  </section>
+
+  <section class="visual-box" aria-label="포트폴리오 시각화">
+    <div class="visual-head">
+      <h2>포트폴리오 시각화</h2>
+      <button type="button" onclick="renderVisuals()">새로고침</button>
+    </div>
+    <div id="visualResult" class="empty">기록을 추가하면 카테고리, 스킬, 활동 기간이 차트로 표시됩니다.</div>
+  </section>
+
+  <section class="list" id="list" aria-live="polite"></section>
+
+  <section class="export-box" aria-label="데이터 백업">
+    <button type="button" onclick="exportData()">데이터 다운로드(JSON)</button>
+    <input id="importFile" type="file" accept="application/json,.json" onchange="importData(event)">
+  </section>
+  </section>
+
+  <section id="tab-experience" class="tab-panel" aria-label="자유경험">
+    <section class="input-box">
+      <p class="notice" id="experienceStatus">새 자유경험을 추가하는 중입니다.</p>
+      <div class="form-grid">
+        <input id="experienceTitle" placeholder="경험 제목" autocomplete="off">
+        <select id="experienceType">
+          <option value="성장">성장</option>
+          <option value="갈등 해결">갈등 해결</option>
+          <option value="협업">협업</option>
+          <option value="도전">도전</option>
+          <option value="실패와 개선">실패와 개선</option>
+          <option value="가치관">가치관</option>
+        </select>
+        <input id="experienceDate" type="date" aria-label="경험 날짜">
+        <input id="experienceKeywords" placeholder="키워드 (쉼표로 구분)" autocomplete="off">
+        <textarea id="experienceSituation" class="full" placeholder="상황 / 배경"></textarea>
+        <textarea id="experienceAction" class="full" placeholder="내가 한 행동"></textarea>
+        <textarea id="experienceResult" class="full" placeholder="결과 / 배운 점"></textarea>
+      </div>
+      <div class="toolbar" style="margin:12px 0 0">
+        <button type="button" id="experienceSaveButton" onclick="addExperience()">추가</button>
+        <button type="button" class="dark" onclick="resetExperienceForm()">취소</button>
+      </div>
+    </section>
+    <section class="experience-list" id="experienceList" aria-live="polite"></section>
+  </section>
+
+  <section class="outline-box" aria-label="자기소개서 개요 생성">
+    <div class="analysis-head">
+      <h2>자기소개서 개요 AI 생성</h2>
+      <button type="button" onclick="generateCoverLetterOutline()">개요 생성</button>
+    </div>
+    <div id="outlineResult" class="empty">인적사항, 포트폴리오, 자유경험을 바탕으로 자기소개서 개요를 만들어 줍니다.</div>
+  </section>
+</main>
+
+<script>
+const STORAGE_KEY = 'portfolio';
+const PROFILE_KEY = 'portfolioProfile';
+const EXPERIENCE_KEY = 'portfolioExperiences';
+let editId = null;
+let experienceEditId = null;
+
+const fields = {
+  title: document.getElementById('title'),
+  category: document.getElementById('category'),
+  role: document.getElementById('role'),
+  skills: document.getElementById('skills'),
+  dateStart: document.getElementById('dateStart'),
+  dateEnd: document.getElementById('dateEnd'),
+  desc: document.getElementById('desc'),
+  result: document.getElementById('result'),
+  link: document.getElementById('link')
+};
+
+const profileFields = {
+  name: document.getElementById('profileName'),
+  birth: document.getElementById('profileBirth'),
+  education: document.getElementById('profileEducation'),
+  major: document.getElementById('profileMajor'),
+  email: document.getElementById('profileEmail'),
+  phone: document.getElementById('profilePhone'),
+  target: document.getElementById('profileTarget'),
+  note: document.getElementById('profileNote')
+};
+
+const experienceFields = {
+  title: document.getElementById('experienceTitle'),
+  type: document.getElementById('experienceType'),
+  date: document.getElementById('experienceDate'),
+  keywords: document.getElementById('experienceKeywords'),
+  situation: document.getElementById('experienceSituation'),
+  action: document.getElementById('experienceAction'),
+  result: document.getElementById('experienceResult')
+};
+
+function readJson(key, fallback){
+  try{
+    const parsed = JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+    return parsed ?? fallback;
+  }catch{
+    return fallback;
+  }
+}
+
+function writeJson(key, value){
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function switchTab(tabName){
+  document.querySelectorAll('.tab-button').forEach(button=>{
+    button.classList.toggle('active', button.dataset.tab === tabName);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel=>{
+    panel.classList.toggle('active', panel.id === `tab-${tabName}`);
+  });
+}
+
+function getProfile(){
+  const data = readJson(PROFILE_KEY, {});
+  return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+}
+
+function saveProfileData(data){
+  writeJson(PROFILE_KEY, data);
+}
+
+function getExperiences(){
+  const data = readJson(EXPERIENCE_KEY, []);
+  return Array.isArray(data) ? data : [];
+}
+
+function saveExperiences(data){
+  writeJson(EXPERIENCE_KEY, data);
+}
+
+function getData(){
+  try{
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  }catch{
+    return [];
+  }
+}
+
+function saveData(data){
+  writeJson(STORAGE_KEY, data);
+}
+
+function saveProfile(){
+  const profile = {};
+  Object.entries(profileFields).forEach(([key, field])=>{
+    profile[key] = field.value.trim();
+  });
+  saveProfileData(profile);
+  renderProfile();
+  generateCoverLetterOutline(false);
+}
+
+function renderProfile(){
+  const profile = getProfile();
+  Object.entries(profileFields).forEach(([key, field])=>{
+    field.value = profile[key] || '';
+  });
+
+  const summary = document.getElementById('profileSummary');
+  summary.replaceChildren();
+  const items = [
+    ['이름', profile.name],
+    ['생년월일', profile.birth],
+    ['학력', profile.education],
+    ['전공 / 관심 분야', profile.major],
+    ['희망 직무', profile.target],
+    ['메모', profile.note]
+  ].filter(([,value])=>value);
+
+  if(!items.length){
+    appendText(summary, 'div', '저장된 인적사항이 없습니다.', 'empty');
+    return;
+  }
+
+  items.forEach(([label, value])=>{
+    const item = document.createElement('div');
+    item.className = 'profile-item';
+    appendText(item, 'strong', label);
+    appendText(item, 'span', value);
+    summary.appendChild(item);
+  });
+}
+
+function normalizeUrl(url){
+  const trimmed = url.trim();
+  if(!trimmed) return '';
+  if(/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
+function getFormItem(previous){
+  return {
+    id: editId || Date.now(),
+    title: fields.title.value.trim(),
+    category: fields.category.value,
+    role: fields.role.value.trim(),
+    skills: fields.skills.value.split(',').map(s=>s.trim()).filter(Boolean),
+    dateStart: fields.dateStart.value.trim(),
+    dateEnd: fields.dateEnd.value.trim(),
+    desc: fields.desc.value.trim(),
+    result: fields.result.value.trim(),
+    link: normalizeUrl(fields.link.value),
+    important: previous ? Boolean(previous.important) : false
+  };
+}
+
+function add(){
+  const data = getData();
+  const previous = editId ? data.find(v=>v.id === editId) : null;
+  const item = getFormItem(previous);
+
+  if(!item.title){
+    alert('제목을 입력해 주세요.');
+    fields.title.focus();
+    return;
+  }
+
+  const nextData = editId
+    ? data.map(v=>v.id === editId ? item : v)
+    : [...data, item];
+
+  saveData(nextData);
+  resetForm();
+  render();
+}
+
+function resetForm(){
+  Object.values(fields).forEach(field=>{
+    if(field.tagName === 'SELECT') field.selectedIndex = 0;
+    else field.value = '';
+  });
+  editId = null;
+  document.getElementById('saveButton').textContent = '추가';
+  document.getElementById('formStatus').textContent = '새 기록을 추가하는 중입니다.';
+}
+
+function editItem(id){
+  const v = getData().find(x=>x.id === id);
+  if(!v) return;
+  fields.title.value = v.title || '';
+  fields.category.value = v.category || '영상';
+  fields.role.value = v.role || '';
+  fields.skills.value = Array.isArray(v.skills) ? v.skills.join(', ') : '';
+  fields.dateStart.value = v.dateStart || '';
+  fields.dateEnd.value = v.dateEnd || '';
+  fields.desc.value = v.desc || '';
+  fields.result.value = v.result || '';
+  fields.link.value = v.link || '';
+  editId = id;
+  document.getElementById('saveButton').textContent = '수정 저장';
+  document.getElementById('formStatus').textContent = `"${v.title}" 기록을 수정하는 중입니다.`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleStar(id){
+  const data = getData().map(v=>v.id === id ? {...v, important: !v.important} : v);
+  saveData(data);
+  render();
+}
+
+function remove(id){
+  const item = getData().find(v=>v.id === id);
+  if(!item || !confirm(`"${item.title}" 기록을 삭제할까요?`)) return;
+  saveData(getData().filter(v=>v.id !== id));
+  if(editId === id) resetForm();
+  render();
+}
+
+function getExperienceFormItem(previous){
+  return {
+    id: experienceEditId || Date.now(),
+    title: experienceFields.title.value.trim(),
+    type: experienceFields.type.value,
+    date: experienceFields.date.value.trim(),
+    keywords: experienceFields.keywords.value.split(',').map(v=>v.trim()).filter(Boolean),
+    situation: experienceFields.situation.value.trim(),
+    action: experienceFields.action.value.trim(),
+    result: experienceFields.result.value.trim(),
+    important: previous ? Boolean(previous.important) : false
+  };
+}
+
+function addExperience(){
+  const data = getExperiences();
+  const previous = experienceEditId ? data.find(v=>v.id === experienceEditId) : null;
+  const item = getExperienceFormItem(previous);
+
+  if(!item.title){
+    alert('경험 제목을 입력해 주세요.');
+    experienceFields.title.focus();
+    return;
+  }
+
+  const nextData = experienceEditId
+    ? data.map(v=>v.id === experienceEditId ? item : v)
+    : [...data, item];
+
+  saveExperiences(nextData);
+  resetExperienceForm();
+  renderExperiences();
+  generateCoverLetterOutline(false);
+}
+
+function resetExperienceForm(){
+  Object.values(experienceFields).forEach(field=>{
+    if(field.tagName === 'SELECT') field.selectedIndex = 0;
+    else field.value = '';
+  });
+  experienceEditId = null;
+  document.getElementById('experienceSaveButton').textContent = '추가';
+  document.getElementById('experienceStatus').textContent = '새 자유경험을 추가하는 중입니다.';
+}
+
+function editExperience(id){
+  const item = getExperiences().find(v=>v.id === id);
+  if(!item) return;
+  experienceFields.title.value = item.title || '';
+  experienceFields.type.value = item.type || '성장';
+  experienceFields.date.value = item.date || '';
+  experienceFields.keywords.value = Array.isArray(item.keywords) ? item.keywords.join(', ') : '';
+  experienceFields.situation.value = item.situation || '';
+  experienceFields.action.value = item.action || '';
+  experienceFields.result.value = item.result || '';
+  experienceEditId = id;
+  document.getElementById('experienceSaveButton').textContent = '수정 저장';
+  document.getElementById('experienceStatus').textContent = `"${item.title}" 경험을 수정하는 중입니다.`;
+  switchTab('experience');
+}
+
+function removeExperience(id){
+  const item = getExperiences().find(v=>v.id === id);
+  if(!item || !confirm(`"${item.title}" 경험을 삭제할까요?`)) return;
+  saveExperiences(getExperiences().filter(v=>v.id !== id));
+  if(experienceEditId === id) resetExperienceForm();
+  renderExperiences();
+  generateCoverLetterOutline(false);
+}
+
+function toggleExperienceStar(id){
+  const data = getExperiences().map(v=>v.id === id ? {...v, important: !v.important} : v);
+  saveExperiences(data);
+  renderExperiences();
+  generateCoverLetterOutline(false);
+}
+
+function appendText(parent, tag, text, className){
+  const el = document.createElement(tag);
+  if(className) el.className = className;
+  el.textContent = text;
+  parent.appendChild(el);
+  return el;
+}
+
+function createCard(v, withActions = true){
+  const el = document.createElement('article');
+  el.className = 'card';
+
+  if(withActions){
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    actions.innerHTML = `
+      <button type="button" class="star" aria-label="중요 표시">${v.important ? '★' : '☆'}</button>
+      <button type="button" class="edit">수정</button>
+      <button type="button" class="delete">삭제</button>
+    `;
+    actions.querySelector('.star').onclick = ()=>toggleStar(v.id);
+    actions.querySelector('.edit').onclick = ()=>editItem(v.id);
+    actions.querySelector('.delete').onclick = ()=>remove(v.id);
+    el.appendChild(actions);
+  }
+
+  appendText(el, 'h3', v.title || '제목 없음');
+  appendText(el, 'div', `${v.category || '분류 없음'} | ${v.dateStart || '-'} ~ ${v.dateEnd || '-'}`, 'meta');
+
+  const tags = document.createElement('div');
+  tags.className = 'tags';
+  (Array.isArray(v.skills) ? v.skills : []).forEach(skill=>appendText(tags, 'span', skill, 'tag'));
+  el.appendChild(tags);
+
+  if(v.desc) appendText(el, 'div', v.desc, 'detail');
+  if(v.role) appendText(el, 'div', `역할: ${v.role}`, 'meta');
+  if(v.result) appendText(el, 'div', `성과: ${v.result}`, 'meta');
+  if(v.link){
+    const link = appendText(el, 'a', '링크 보기', 'link');
+    link.href = v.link;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+  return el;
+}
+
+function createExperienceCard(v){
+  const el = document.createElement('article');
+  el.className = 'card';
+
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  actions.innerHTML = `
+    <button type="button" class="star" aria-label="중요 표시">${v.important ? '★' : '☆'}</button>
+    <button type="button" class="edit">수정</button>
+    <button type="button" class="delete">삭제</button>
+  `;
+  actions.querySelector('.star').onclick = ()=>toggleExperienceStar(v.id);
+  actions.querySelector('.edit').onclick = ()=>editExperience(v.id);
+  actions.querySelector('.delete').onclick = ()=>removeExperience(v.id);
+  el.appendChild(actions);
+
+  appendText(el, 'h3', v.title || '제목 없음');
+  appendText(el, 'div', `${v.type || '경험'} | ${v.date || '-'}`, 'meta');
+
+  const tags = document.createElement('div');
+  tags.className = 'tags';
+  (Array.isArray(v.keywords) ? v.keywords : []).forEach(keyword=>appendText(tags, 'span', keyword, 'tag'));
+  el.appendChild(tags);
+
+  if(v.situation) appendText(el, 'div', `상황: ${v.situation}`, 'detail');
+  if(v.action) appendText(el, 'div', `행동: ${v.action}`, 'detail');
+  if(v.result) appendText(el, 'div', `결과/배운 점: ${v.result}`, 'detail');
+  return el;
+}
+
+function renderExperiences(){
+  const container = document.getElementById('experienceList');
+  const data = getExperiences().slice().reverse();
+  container.replaceChildren();
+
+  if(!data.length){
+    appendText(container, 'div', '아직 자유경험 기록이 없습니다.', 'empty');
+    return;
+  }
+
+  data.forEach(item=>container.appendChild(createExperienceCard(item)));
+}
+
+function getFilteredData(){
+  const keyword = document.getElementById('search').value.trim().toLowerCase();
+  const filterVal = document.getElementById('filter').value;
+  return getData().filter(v=>{
+    const haystack = [v.title, v.desc, v.role, v.result, ...(Array.isArray(v.skills) ? v.skills : [])]
+      .join(' ')
+      .toLowerCase();
+    const matchKeyword = !keyword || haystack.includes(keyword);
+    const matchFilter = filterVal === 'all'
+      ? true
+      : filterVal === 'important'
+        ? v.important
+        : v.category === filterVal;
+    return matchKeyword && matchFilter;
+  });
+}
+
+function render(){
+  const container = document.getElementById('list');
+  const filtered = getFilteredData().slice().reverse();
+  container.replaceChildren();
+
+  if(!filtered.length){
+    appendText(container, 'div', '표시할 기록이 없습니다.', 'empty');
+    renderVisuals();
+    generateCoverLetterOutline(false);
+    return;
+  }
+
+  filtered.forEach(v=>container.appendChild(createCard(v)));
+  renderVisuals();
+  generateCoverLetterOutline(false);
+}
+
+function showPortfolio(){
+  const container = document.getElementById('list');
+  const important = getData().filter(v=>v.important);
+  container.replaceChildren();
+
+  if(!important.length){
+    appendText(container, 'div', '중요 표시된 기록이 없습니다.', 'empty');
+    return;
+  }
+
+  important.forEach(v=>container.appendChild(createCard(v, false)));
+}
+
+function countValues(values){
+  const counts = new Map();
+  values.filter(Boolean).forEach(value=>{
+    counts.set(value, (counts.get(value) || 0) + 1);
+  });
+  return [...counts.entries()].sort((a,b)=>b[1] - a[1]);
+}
+
+function getMonthKey(dateText){
+  if(!dateText) return '';
+  return dateText.slice(0, 7);
+}
+
+function getDateValue(dateText){
+  const time = new Date(dateText || '').getTime();
+  return Number.isFinite(time) ? time : null;
+}
+
+function appendBarChart(parent, entries){
+  const list = document.createElement('div');
+  list.className = 'bar-list';
+  const max = Math.max(...entries.map(([,count])=>count), 1);
+
+  entries.forEach(([label, count])=>{
+    const row = document.createElement('div');
+    const labelRow = document.createElement('div');
+    labelRow.className = 'bar-label';
+    appendText(labelRow, 'span', label);
+    appendText(labelRow, 'strong', `${count}개`);
+
+    const track = document.createElement('div');
+    track.className = 'bar-track';
+    const fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    fill.style.width = `${Math.max(8, Math.round((count / max) * 100))}%`;
+    track.appendChild(fill);
+
+    row.append(labelRow, track);
+    list.appendChild(row);
+  });
+
+  parent.appendChild(list);
+}
+
+function appendSkillCloud(parent, entries){
+  const cloud = document.createElement('div');
+  cloud.className = 'skill-cloud';
+  const max = Math.max(...entries.map(([,count])=>count), 1);
+
+  entries.forEach(([skill, count])=>{
+    const bubble = appendText(cloud, 'span', skill, 'skill-bubble');
+    const size = 13 + Math.round((count / max) * 10);
+    bubble.style.fontSize = `${size}px`;
+    bubble.title = `${count}회`;
+  });
+
+  parent.appendChild(cloud);
+}
+
+function appendTimeline(parent, items){
+  const validItems = items
+    .map(v=>{
+      const start = getDateValue(v.dateStart);
+      const rawEnd = getDateValue(v.dateEnd) || start;
+      const end = rawEnd && start ? Math.max(start, rawEnd) : start;
+      return start ? {...v, start, end} : null;
+    })
+    .filter(Boolean)
+    .sort((a,b)=>a.start - b.start);
+
+  if(!validItems.length){
+    appendText(parent, 'div', '날짜가 입력된 기록이 있으면 타임라인이 표시됩니다.', 'meta');
+    return;
+  }
+
+  const min = Math.min(...validItems.map(v=>v.start));
+  const max = Math.max(...validItems.map(v=>v.end));
+  const range = Math.max(max - min, 1);
+  const timeline = document.createElement('div');
+  timeline.className = 'timeline';
+
+  validItems.slice(-7).forEach(v=>{
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    appendText(item, 'div', v.title || '제목 없음', 'timeline-title');
+
+    const track = document.createElement('div');
+    track.className = 'timeline-track';
+    track.title = `${getMonthKey(v.dateStart) || '-'} ~ ${getMonthKey(v.dateEnd) || getMonthKey(v.dateStart) || '-'}`;
+
+    const fill = document.createElement('div');
+    fill.className = 'timeline-fill';
+    fill.style.left = `${Math.round(((v.start - min) / range) * 100)}%`;
+    fill.style.width = `${Math.max(8, Math.round(((v.end - v.start) / range) * 100))}%`;
+    track.appendChild(fill);
+
+    item.appendChild(track);
+    timeline.appendChild(item);
+  });
+
+  parent.appendChild(timeline);
+}
+
+function renderVisuals(){
+  const data = getData();
+  const result = document.getElementById('visualResult');
+  result.className = '';
+  result.replaceChildren();
+
+  if(!data.length){
+    result.className = 'empty';
+    result.textContent = '기록을 추가하면 카테고리, 스킬, 활동 기간이 차트로 표시됩니다.';
+    return;
+  }
+
+  const categoryCounts = countValues(data.map(v=>v.category));
+  const skillCounts = countValues(data.flatMap(v=>Array.isArray(v.skills) ? v.skills : [])).slice(0, 12);
+  const importantCount = data.filter(v=>v.important).length;
+  const datedCount = data.filter(v=>v.dateStart || v.dateEnd).length;
+
+  const stats = document.createElement('div');
+  stats.className = 'stat-row';
+  [
+    ['전체 기록', data.length],
+    ['중요 기록', importantCount],
+    ['날짜 기록', datedCount]
+  ].forEach(([label, value])=>{
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    appendText(card, 'span', String(value), 'stat-value');
+    appendText(card, 'span', label, 'stat-label');
+    stats.appendChild(card);
+  });
+
+  const grid = document.createElement('div');
+  grid.className = 'visual-grid';
+
+  const categoryPanel = document.createElement('div');
+  categoryPanel.className = 'visual-panel';
+  appendText(categoryPanel, 'h3', '카테고리 분포');
+  appendBarChart(categoryPanel, categoryCounts);
+
+  const skillPanel = document.createElement('div');
+  skillPanel.className = 'visual-panel';
+  appendText(skillPanel, 'h3', '스킬 키워드');
+  if(skillCounts.length) appendSkillCloud(skillPanel, skillCounts);
+  else appendText(skillPanel, 'div', '스킬을 입력하면 키워드가 표시됩니다.', 'meta');
+
+  const timelinePanel = document.createElement('div');
+  timelinePanel.className = 'visual-panel';
+  appendText(timelinePanel, 'h3', '활동 타임라인');
+  appendTimeline(timelinePanel, data);
+
+  grid.append(categoryPanel, skillPanel, timelinePanel);
+  result.append(stats, grid);
+}
+
+function countMatches(text, words){
+  return words.reduce((score, word)=>{
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const matches = text.match(new RegExp(escaped, 'gi'));
+    return score + (matches ? matches.length : 0);
+  }, 0);
+}
+
+function getPortfolioText(data){
+  return data.map(v=>[
+    v.title,
+    v.category,
+    v.role,
+    Array.isArray(v.skills) ? v.skills.join(' ') : '',
+    v.desc,
+    v.result
+  ].join(' ')).join(' ').toLowerCase();
+}
+
+function analyzeJobs(data){
+  const text = getPortfolioText(data);
+  const jobRules = [
+    {
+      name: '콘텐츠 기획자',
+      reason: '기획, 주제 선정, 메시지 구성 경험을 직무 강점으로 연결하기 좋습니다.',
+      words: ['기획','콘텐츠','아이디어','구성','스토리','시나리오','대본','캠페인','브랜딩','타깃','SNS','인스타','유튜브']
+    },
+    {
+      name: '영상 편집자 / PD',
+      reason: '촬영과 편집 결과물이 많다면 제작 역량을 직접 보여주기 좋습니다.',
+      words: ['영상','촬영','편집','프리미어','프리미어프로','애프터이펙트','after effects','컷편집','색보정','썸네일','유튜브','릴스','쇼츠']
+    },
+    {
+      name: '마케팅 / 홍보',
+      reason: '성과, 확산, 참여 유도 경험을 수치와 함께 말하기 좋습니다.',
+      words: ['마케팅','홍보','광고','캠페인','성과','조회수','노출','전환','팔로워','참여','이벤트','브랜드','sns','분석']
+    },
+    {
+      name: '프로젝트 매니저',
+      reason: '일정 관리, 협업, 역할 조율 경험이 반복된다면 운영 역량이 강점입니다.',
+      words: ['PM','프로젝트','운영','관리','일정','조율','협업','팀','리더','커뮤니케이션','회의','발표','문제 해결']
+    },
+    {
+      name: '서비스 / UX 기획',
+      reason: '사용자 관점으로 문제를 정의하고 개선한 경험을 강조할 수 있습니다.',
+      words: ['UX','UI','서비스','사용자','리서치','설문','인터뷰','개선','기획서','프로토타입','피그마','figma','화면']
+    },
+    {
+      name: '교육 / 학습 콘텐츠',
+      reason: '학업, 설명, 자료 제작 경험이 많다면 전달력 중심으로 어필하기 좋습니다.',
+      words: ['학업','교육','강의','튜터','멘토링','자료','정리','발표','보고서','학습','설명','수업','스터디']
+    }
+  ];
+
+  return jobRules
+    .map(job=>{
+      const categoryBonus = data.filter(v=>job.words.includes(v.category)).length * 2;
+      const importantBonus = data.filter(v=>v.important && countMatches([
+        v.title,
+        v.category,
+        v.role,
+        Array.isArray(v.skills) ? v.skills.join(' ') : '',
+        v.desc,
+        v.result
+      ].join(' ').toLowerCase(), job.words) > 0).length * 2;
+      return {
+        ...job,
+        score: countMatches(text, job.words) + categoryBonus + importantBonus
+      };
+    })
+    .filter(job=>job.score > 0)
+    .sort((a,b)=>b.score - a.score)
+    .slice(0, 3);
+}
+
+function analyzeStrengths(data){
+  const text = getPortfolioText(data);
+  const strengthRules = [
+    {keyword:'기획력', words:['기획','구성','아이디어','주제','콘셉트','전략','기획서']},
+    {keyword:'실행력', words:['제작','진행','운영','완성','실행','업로드','참여','담당']},
+    {keyword:'문제 해결력', words:['문제','해결','개선','보완','수정','피드백','오류','효율']},
+    {keyword:'협업력', words:['협업','팀','조율','소통','회의','역할','리더','커뮤니케이션']},
+    {keyword:'분석력', words:['분석','성과','결과','데이터','조회수','전환','비교','평가']},
+    {keyword:'표현력', words:['영상','디자인','편집','스토리','발표','카피','콘텐츠','시각화']},
+    {keyword:'책임감', words:['알바','운영','관리','마감','일정','고객','응대','담당']},
+    {keyword:'성장지향', words:['학습','공부','도전','스터디','자격증','연습','개발','성장']}
+  ];
+
+  const scored = strengthRules
+    .map(item=>({...item, score: countMatches(text, item.words)}))
+    .filter(item=>item.score > 0)
+    .sort((a,b)=>b.score - a.score)
+    .slice(0, 6);
+
+  const skillCounts = new Map();
+  data.forEach(v=>{
+    (Array.isArray(v.skills) ? v.skills : []).forEach(skill=>{
+      const key = skill.trim();
+      if(key) skillCounts.set(key, (skillCounts.get(key) || 0) + 1);
+    });
+  });
+
+  const frequentSkills = [...skillCounts.entries()]
+    .sort((a,b)=>b[1] - a[1])
+    .slice(0, 5)
+    .map(([skill])=>skill);
+
+  return {
+    strengths: scored.map(item=>item.keyword),
+    skills: frequentSkills
+  };
+}
+
+function createRecommendationItem(job){
+  const item = document.createElement('div');
+  item.className = 'recommend-item';
+
+  const textBox = document.createElement('div');
+  appendText(textBox, 'strong', job.name);
+  appendText(textBox, 'div', job.reason, 'meta');
+
+  appendText(item, 'span', `${job.score}점`, 'score');
+  item.prepend(textBox);
+  return item;
+}
+
+function appendKeywordList(parent, words){
+  const list = document.createElement('div');
+  list.className = 'keyword-list';
+  words.forEach(word=>appendText(list, 'span', word, 'keyword'));
+  parent.appendChild(list);
+}
+
+function analyzePortfolio(){
+  const data = getData();
+  const result = document.getElementById('analysisResult');
+  result.className = '';
+  result.replaceChildren();
+
+  if(!data.length){
+    result.className = 'empty';
+    result.textContent = '분석할 기록이 없습니다. 먼저 포트폴리오 기록을 추가해 주세요.';
+    return;
+  }
+
+  const jobs = analyzeJobs(data);
+  const strengths = analyzeStrengths(data);
+
+  const grid = document.createElement('div');
+  grid.className = 'analysis-grid';
+
+  const jobPanel = document.createElement('div');
+  jobPanel.className = 'analysis-panel';
+  appendText(jobPanel, 'h3', '추천 직무');
+  const recommendList = document.createElement('div');
+  recommendList.className = 'recommend-list';
+  if(jobs.length){
+    jobs.forEach(job=>recommendList.appendChild(createRecommendationItem(job)));
+  }else{
+    appendText(recommendList, 'div', '아직 직무를 추천할 만큼의 단서가 부족합니다.', 'meta');
+  }
+  jobPanel.appendChild(recommendList);
+
+  const keywordPanel = document.createElement('div');
+  keywordPanel.className = 'analysis-panel';
+  appendText(keywordPanel, 'h3', '자기소개 강점 키워드');
+  const keywords = strengths.strengths.length ? strengths.strengths : ['성실함','책임감','성장 가능성'];
+  appendKeywordList(keywordPanel, keywords);
+
+  const skillPanel = document.createElement('div');
+  skillPanel.className = 'analysis-panel';
+  appendText(skillPanel, 'h3', '자주 드러난 스킬');
+  if(strengths.skills.length){
+    appendKeywordList(skillPanel, strengths.skills);
+  }else{
+    appendText(skillPanel, 'div', '스킬 칸에 더 많이 적을수록 추천이 정확해집니다.', 'meta');
+  }
+
+  const sentencePanel = document.createElement('div');
+  sentencePanel.className = 'analysis-panel';
+  appendText(sentencePanel, 'h3', '자기소개 문장 재료');
+  const topJob = jobs[0] ? jobs[0].name : '관심 직무';
+  const topKeywords = keywords.slice(0, 3).join(', ');
+  appendText(sentencePanel, 'p', `저는 여러 활동에서 ${topKeywords}을 바탕으로 결과물을 완성해 온 사람입니다. 특히 ${topJob}와 연결되는 경험을 통해 기획부터 실행, 결과 정리까지 맡아 본 점을 강점으로 말할 수 있습니다.`, 'sentence');
+
+  grid.append(jobPanel, keywordPanel, skillPanel, sentencePanel);
+  result.appendChild(grid);
+}
+
+function getExperienceText(data){
+  return data.map(v=>[
+    v.title,
+    v.type,
+    Array.isArray(v.keywords) ? v.keywords.join(' ') : '',
+    v.situation,
+    v.action,
+    v.result
+  ].join(' ')).join(' ').toLowerCase();
+}
+
+function getCombinedText(){
+  const profile = getProfile();
+  return [
+    profile.education,
+    profile.major,
+    profile.target,
+    profile.note,
+    getPortfolioText(getData()),
+    getExperienceText(getExperiences())
+  ].join(' ').toLowerCase();
+}
+
+function getCombinedStrengths(){
+  const portfolioStrengths = analyzeStrengths(getData()).strengths;
+  const text = getCombinedText();
+  const extraRules = [
+    {keyword:'주도성', words:['주도','먼저','제안','리드','기획','도전']},
+    {keyword:'소통력', words:['소통','협업','조율','회의','갈등','설득','발표']},
+    {keyword:'문제 해결력', words:['문제','해결','개선','실패','보완','피드백']},
+    {keyword:'책임감', words:['책임','마감','관리','운영','성실','꾸준']},
+    {keyword:'학습력', words:['학습','공부','성장','스터디','연습','전공']},
+    {keyword:'실행력', words:['실행','제작','완성','진행','성과','결과']}
+  ];
+  const extraStrengths = extraRules
+    .map(rule=>({...rule, score: countMatches(text, rule.words)}))
+    .filter(rule=>rule.score > 0)
+    .sort((a,b)=>b.score - a.score)
+    .map(rule=>rule.keyword);
+  return [...new Set([...portfolioStrengths, ...extraStrengths])].slice(0, 5);
+}
+
+function getImportantMaterials(){
+  const portfolios = getData()
+    .filter(v=>v.important)
+    .concat(getData().filter(v=>!v.important))
+    .slice(0, 3)
+    .map(v=>v.title)
+    .filter(Boolean);
+  const experiences = getExperiences()
+    .filter(v=>v.important)
+    .concat(getExperiences().filter(v=>!v.important))
+    .slice(0, 3)
+    .map(v=>v.title)
+    .filter(Boolean);
+  return {portfolios, experiences};
+}
+
+function createOutlineItem(title, body){
+  const item = document.createElement('article');
+  item.className = 'outline-item';
+  appendText(item, 'h3', title);
+  appendText(item, 'p', body);
+  return item;
+}
+
+function generateCoverLetterOutline(force = true){
+  const result = document.getElementById('outlineResult');
+  if(!force && result.dataset.generated !== 'true') return;
+
+  const profile = getProfile();
+  const portfolios = getData();
+  const experiences = getExperiences();
+  const hasData = Object.values(profile).some(Boolean) || portfolios.length || experiences.length;
+
+  result.className = '';
+  result.replaceChildren();
+
+  if(!hasData){
+    result.className = 'empty';
+    result.textContent = '개요를 만들 데이터가 없습니다. 인적사항, 포트폴리오, 자유경험 중 하나 이상을 입력해 주세요.';
+    result.dataset.generated = 'false';
+    return;
+  }
+
+  const jobs = analyzeJobs(portfolios);
+  const strengths = getCombinedStrengths();
+  const materials = getImportantMaterials();
+  const target = profile.target || (jobs[0] ? jobs[0].name : '지원 직무');
+  const major = profile.major || profile.education || '나의 배경';
+  const topStrengths = strengths.length ? strengths.slice(0, 3).join(', ') : '성실함, 책임감, 성장 가능성';
+  const mainPortfolio = materials.portfolios[0] || '대표 포트폴리오';
+  const mainExperience = materials.experiences[0] || '자유경험 기록';
+
+  const list = document.createElement('div');
+  list.className = 'outline-list';
+  [
+    ['1. 도입: 지원 분야와 나의 방향성', `${profile.name ? profile.name + '은/는 ' : ''}${major}을 바탕으로 ${target} 분야에 관심을 갖게 되었음을 밝힙니다. 관심이 단순한 희망이 아니라 실제 기록과 경험으로 이어졌다는 흐름을 첫 문단에서 잡습니다.`],
+    ['2. 핵심 강점', `${topStrengths}을 핵심 키워드로 잡고, 주장만 쓰기보다 포트폴리오와 자유경험에서 확인되는 행동을 근거로 연결합니다.`],
+    ['3. 대표 경험 1: 포트폴리오', `${mainPortfolio} 경험을 중심 사례로 사용합니다. 맡은 역할, 사용한 스킬, 결과를 순서대로 정리하면 직무 역량을 보여주는 문단이 됩니다.`],
+    ['4. 대표 경험 2: 자유경험', `${mainExperience} 경험에서는 상황, 행동, 결과/배운 점을 STAR 구조로 정리합니다. 성격의 장점이나 협업 태도를 보여주는 문단으로 쓰기 좋습니다.`],
+    ['5. 마무리: 입사 후 기여 방향', `${target}에서 지금까지 쌓은 경험을 어떻게 확장할지 씁니다. 앞으로 배우고 싶은 점과 조직에 기여할 수 있는 방식을 한 문단으로 정리합니다.`]
+  ].forEach(([title, body])=>list.appendChild(createOutlineItem(title, body)));
+
+  const materialPanel = document.createElement('div');
+  materialPanel.className = 'analysis-panel';
+  appendText(materialPanel, 'h3', '개요에 넣기 좋은 재료');
+  appendKeywordList(materialPanel, [
+    ...strengths.slice(0, 5),
+    ...materials.portfolios.slice(0, 2),
+    ...materials.experiences.slice(0, 2)
+  ].filter(Boolean));
+
+  result.dataset.generated = 'true';
+  result.append(list, materialPanel);
+}
+
+function exportData(){
+  const data = JSON.stringify({
+    profile: getProfile(),
+    portfolio: getData(),
+    experiences: getExperiences()
+  }, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(Array.isArray(parsed)){
+        saveData(parsed);
+      }else if(parsed && typeof parsed === 'object'){
+        if(parsed.profile && typeof parsed.profile === 'object') saveProfileData(parsed.profile);
+        if(Array.isArray(parsed.portfolio)) saveData(parsed.portfolio);
+        if(Array.isArray(parsed.experiences)) saveExperiences(parsed.experiences);
+      }else{
+        throw new Error('Invalid portfolio data');
+      }
+      resetForm();
+      resetExperienceForm();
+      renderProfile();
+      renderExperiences();
+      render();
+      generateCoverLetterOutline(false);
+    }catch{
+      alert('가져올 수 없는 JSON 파일입니다.');
+    }finally{
+      e.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+renderProfile();
+renderExperiences();
+render();
+</script>
+</body>
+</html>
