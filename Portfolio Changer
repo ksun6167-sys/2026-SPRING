@@ -1,231 +1,215 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나만의 포트폴리오</title>
-    <style>
-        /* 전체적인 디자인 */
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            margin: 0;
-            padding: 40px 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-        
-        /* 입력 영역 스타일 */
-        .input-section {
-            background: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 40px;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 15px;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: #2980b9;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #3498db;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트폴리오 기록 관리</title>
+<style>
+body{margin:0;font-family:sans-serif;background:#f3f4f6;color:#111}
+.container{max-width:1000px;margin:0 auto;padding:30px}
+h1{text-align:center;margin-bottom:20px}
 
-        /* 포트폴리오 리스트 영역 스타일 */
-        .portfolio-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .portfolio-item {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 5px solid #2980b9;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            position: relative;
-        }
-        .portfolio-item h3 {
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-        }
-        .portfolio-item .date {
-            font-size: 13px;
-            color: #7f8c8d;
-            margin-bottom: 10px;
-        }
-        .portfolio-item .desc {
-            line-height: 1.6;
-            white-space: pre-wrap; 
-        }
-        
-        /* 미디어(영상/이미지) 영역 스타일 */
-        .media-container {
-            margin-top: 15px;
-            border-radius: 8px;
-            overflow: hidden;
-            background-color: #000; /* 영상/이미지 배경을 까맣게 */
-        }
-        .media-container iframe {
-            width: 100%;
-            aspect-ratio: 16 / 9; /* 유튜브 영상 비율 맞춤 */
-            display: block;
-        }
-        .media-container img {
-            width: 100%;
-            max-height: 400px;
-            object-fit: contain; /* 이미지 비율 안 깨지게 */
-            display: block;
-        }
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.toolbar input, .toolbar select{padding:8px;border-radius:6px;border:1px solid #ccc}
 
-        .delete-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #e74c3c;
-            width: auto;
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        .delete-btn:hover {
-            background: #c0392b;
-        }
-    </style>
+.input-box{background:#fff;padding:15px;border-radius:10px;margin-bottom:20px}
+.input-box input, .input-box textarea, .input-box select{
+ width:100%;margin-bottom:8px;padding:8px;border-radius:6px;border:1px solid #ccc
+}
+button{padding:10px;border:none;border-radius:6px;background:#2563eb;color:white;cursor:pointer}
+
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:#fff;padding:15px;border-radius:10px;position:relative}
+.card h3{margin:0 0 5px}
+.meta{font-size:13px;color:#555;margin-bottom:5px}
+.tag{font-size:12px;background:#e5e7eb;padding:2px 6px;border-radius:4px;margin-right:4px}
+
+.actions{position:absolute;top:10px;right:10px;display:flex;gap:5px}
+.actions button{padding:5px 8px;font-size:12px}
+.star{background:#f59e0b}
+.delete{background:#ef4444}
+.edit{background:#10b981}
+
+.detail{margin-top:8px;font-size:14px;white-space:pre-wrap}
+
+.export-box{margin-top:20px}
+.export-box button{background:#111}
+</style>
 </head>
 <body>
+<div class="container">
+<h1>📂 포트폴리오 기록 관리</h1>
 
-    <div class="container">
-        <h1>My Portfolio</h1>
+<div class="input-box">
+<input id="title" placeholder="제목">
+<select id="category">
+<option value="영상">영상</option>
+<option value="대외활동">대외활동</option>
+<option value="알바">알바</option>
+<option value="학업">학업</option>
+</select>
+<input id="role" placeholder="역할">
+<input id="skills" placeholder="스킬 (쉼표로 구분)">
+<input id="dateStart" placeholder="시작 날짜">
+<input id="dateEnd" placeholder="종료 날짜">
+<textarea id="desc" placeholder="설명"></textarea>
+<input id="result" placeholder="성과">
+<input id="link" placeholder="링크 (선택)">
+<button onclick="add()">추가 / 수정</button>
+</div>
 
-        <div class="input-section">
-            <input type="text" id="title" placeholder="프로젝트/경력명 (예: 유튜브 채널 '제공피' 기획 및 운영)">
-            <input type="text" id="date" placeholder="참여 기간 (예: 2024.03 ~ 2025.02)">
-            <textarea id="description" placeholder="상세 역할 및 성과 (예: 구독자 1.5만명 달성, 단편영화 메인 PD 및 음향 감독 참여 등)"></textarea>
-            <input type="text" id="mediaLink" placeholder="유튜브 영상 링크 또는 이미지 URL (선택사항)">
-            <button onclick="addPortfolio()">경력 추가하기</button>
-        </div>
+<div class="toolbar">
+<input id="search" placeholder="검색" oninput="render()">
+<select id="filter" onchange="render()">
+<option value="all">전체</option>
+<option value="영상">영상</option>
+<option value="대외활동">대외활동</option>
+<option value="알바">알바</option>
+<option value="학업">학업</option>
+<option value="important">⭐ 중요만</option>
+</select>
+<button onclick="showPortfolio()">포트폴리오 보기</button>
+</div>
 
-        <div class="portfolio-list" id="portfolioList"></div>
-    </div>
+<div class="list" id="list"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', loadPortfolios);
+<div class="export-box">
+<button onclick="exportData()">데이터 다운로드(JSON)</button>
+<input type="file" onchange="importData(event)">
+</div>
+</div>
 
-        function addPortfolio() {
-            const title = document.getElementById('title').value;
-            const date = document.getElementById('date').value;
-            const description = document.getElementById('description').value;
-            const mediaLink = document.getElementById('mediaLink').value;
+<script>
+let editId = null;
 
-            if(!title || !description) {
-                alert('프로젝트명과 상세 역할은 필수 입력사항입니다!');
-                return;
-            }
+function getData(){return JSON.parse(localStorage.getItem('portfolio'))||[]}
+function saveData(data){localStorage.setItem('portfolio', JSON.stringify(data))}
 
-            const portfolioItem = {
-                id: Date.now(),
-                title: title,
-                date: date,
-                description: description,
-                mediaLink: mediaLink // 미디어 링크 저장
-            };
+function add(){
+ const item={
+  id: editId || Date.now(),
+  title:title.value,
+  category:category.value,
+  role:role.value,
+  skills:skills.value.split(',').map(s=>s.trim()),
+  dateStart:dateStart.value,
+  dateEnd:dateEnd.value,
+  desc:desc.value,
+  result:result.value,
+  link:link.value,
+  important:false
+ }
+ let data=getData();
+ if(editId){
+  data = data.map(v=>v.id===editId?item:v);
+  editId=null;
+ } else {
+  data.push(item);
+ }
+ saveData(data);
+ document.querySelectorAll('.input-box input, .input-box textarea').forEach(i=>i.value='');
+ render();
+}
 
-            let portfolios = JSON.parse(localStorage.getItem('myPortfolios')) || [];
-            portfolios.push(portfolioItem);
-            localStorage.setItem('myPortfolios', JSON.stringify(portfolios));
-            
-            // 입력창 초기화
-            document.getElementById('title').value = '';
-            document.getElementById('date').value = '';
-            document.getElementById('description').value = '';
-            document.getElementById('mediaLink').value = '';
+function editItem(id){
+ const v = getData().find(x=>x.id===id);
+ title.value=v.title;
+ category.value=v.category;
+ role.value=v.role;
+ skills.value=v.skills.join(', ');
+ dateStart.value=v.dateStart;
+ dateEnd.value=v.dateEnd;
+ desc.value=v.desc;
+ result.value=v.result;
+ link.value=v.link;
+ editId=id;
+}
 
-            renderPortfolios();
-        }
+function toggleStar(id){
+ const data=getData().map(v=>v.id===id?{...v,important:!v.important}:v);
+ saveData(data);
+ render();
+}
 
-        function deletePortfolio(id) {
-            let portfolios = JSON.parse(localStorage.getItem('myPortfolios')) || [];
-            portfolios = portfolios.filter(item => item.id !== id);
-            localStorage.setItem('myPortfolios', JSON.stringify(portfolios));
-            renderPortfolios();
-        }
+function remove(id){
+ const data=getData().filter(v=>v.id!==id);
+ saveData(data);
+ render();
+}
 
-        function renderPortfolios() {
-            const listElement = document.getElementById('portfolioList');
-            listElement.innerHTML = ''; 
+function render(){
+ const data=getData();
+ const keyword=search.value.toLowerCase();
+ const filterVal=filter.value;
 
-            const portfolios = JSON.parse(localStorage.getItem('myPortfolios')) || [];
+ let filtered=data.filter(v=>{
+  const matchKeyword = v.title.toLowerCase().includes(keyword) || v.desc.toLowerCase().includes(keyword);
+  const matchFilter =
+   filterVal==='all' ? true :
+   filterVal==='important' ? v.important :
+   v.category===filterVal;
+  return matchKeyword && matchFilter;
+ });
 
-            portfolios.slice().reverse().forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'portfolio-item';
-                
-                // 유튜브 링크인지 판별하는 정규식
-                let mediaHTML = '';
-                if (item.mediaLink) {
-                    const ytMatch = item.mediaLink.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-                    
-                    if (ytMatch && ytMatch[1]) {
-                        // 유튜브 영상일 경우 iframe으로 임베드
-                        mediaHTML = `
-                            <div class="media-container">
-                                <iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                            </div>
-                        `;
-                    } else {
-                        // 일반 이미지 URL일 경우 img 태그 사용
-                        mediaHTML = `
-                            <div class="media-container">
-                                <img src="${item.mediaLink}" alt="포트폴리오 첨부 이미지" onerror="this.style.display='none';">
-                            </div>
-                        `;
-                    }
-                }
+ list.innerHTML='';
+ filtered.slice().reverse().forEach(v=>{
+  const el=document.createElement('div');
+  el.className='card';
+  el.innerHTML=`
+   <div class="actions">
+    <button class="star" onclick="toggleStar(${v.id})">${v.important?'★':'☆'}</button>
+    <button class="edit" onclick="editItem(${v.id})">수정</button>
+    <button class="delete" onclick="remove(${v.id})">삭제</button>
+   </div>
+   <h3>${v.title}</h3>
+   <div class="meta">${v.category} | ${v.dateStart} ~ ${v.dateEnd}</div>
+   <div>${v.skills.map(s=>`<span class='tag'>${s}</span>`).join('')}</div>
+   <div class="detail">${v.desc}</div>
+   <div class="meta">🎬 ${v.role}</div>
+   <div class="meta">📊 ${v.result}</div>
+   ${v.link?`<a href="${v.link}" target="_blank">링크 보기</a>`:''}
+  `;
+  list.appendChild(el);
+ });
+}
 
-                itemDiv.innerHTML = `
-                    <h3>${item.title}</h3>
-                    <div class="date">${item.date}</div>
-                    <div class="desc">${item.description}</div>
-                    ${mediaHTML}
-                    <button class="delete-btn" onclick="deletePortfolio(${item.id})">삭제</button>
-                `;
-                listElement.appendChild(itemDiv);
-            });
-        }
+function showPortfolio(){
+ const data=getData().filter(v=>v.important);
+ list.innerHTML='';
+ data.forEach(v=>{
+  const el=document.createElement('div');
+  el.className='card';
+  el.innerHTML=`
+   <h3>${v.title}</h3>
+   <div class="meta">${v.dateStart} ~ ${v.dateEnd}</div>
+   <div class="detail">${v.desc}</div>
+   <div class="meta">🎬 ${v.role}</div>
+   <div class="meta">📊 ${v.result}</div>
+  `;
+  list.appendChild(el);
+ });
+}
 
-        function loadPortfolios() {
-            renderPortfolios();
-        }
-    </script>
+function exportData(){
+ const data = JSON.stringify(getData());
+ const blob = new Blob([data], {type:"application/json"});
+ const a = document.createElement('a');
+ a.href = URL.createObjectURL(blob);
+ a.download = 'portfolio.json';
+ a.click();
+}
 
+function importData(e){
+ const file = e.target.files[0];
+ const reader = new FileReader();
+ reader.onload = ()=>{
+  localStorage.setItem('portfolio', reader.result);
+  render();
+ };
+ reader.readAsText(file);
+}
+
+render();
+</script>
 </body>
 </html>
