@@ -5,208 +5,341 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포트폴리오 기록 관리</title>
 <style>
-body{margin:0;font-family:sans-serif;background:#f3f4f6;color:#111}
-.container{max-width:1000px;margin:0 auto;padding:30px}
-h1{text-align:center;margin-bottom:20px}
-
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-.toolbar input, .toolbar select{padding:8px;border-radius:6px;border:1px solid #ccc}
-
-.input-box{background:#fff;padding:15px;border-radius:10px;margin-bottom:20px}
-.input-box input, .input-box textarea, .input-box select{
- width:100%;margin-bottom:8px;padding:8px;border-radius:6px;border:1px solid #ccc
+:root{
+  color-scheme:light;
+  --bg:#f4f5f7;
+  --panel:#ffffff;
+  --text:#15171a;
+  --muted:#626975;
+  --line:#d7dbe2;
+  --blue:#2563eb;
+  --green:#0f9f6e;
+  --red:#dc2626;
+  --amber:#d97706;
+  --ink:#111827;
 }
-button{padding:10px;border:none;border-radius:6px;background:#2563eb;color:white;cursor:pointer}
-
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+.container{max-width:1040px;margin:0 auto;padding:28px 18px 40px}
+h1{text-align:center;margin:0 0 22px;font-size:28px}
+.input-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.full{grid-column:1/-1}
+input,textarea,select{width:100%;padding:10px;border-radius:6px;border:1px solid #c7ccd5;background:#fff;color:var(--text);font:inherit}
+textarea{min-height:96px;resize:vertical}
+button{min-height:40px;padding:0 13px;border:none;border-radius:6px;background:var(--blue);color:#fff;cursor:pointer;font-weight:700}
+button:hover{filter:brightness(.95)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid rgba(37,99,235,.25);outline-offset:1px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.toolbar input{flex:1 1 240px}
+.toolbar select{max-width:180px}
 .list{display:flex;flex-direction:column;gap:10px}
-.card{background:#fff;padding:15px;border-radius:10px;position:relative}
-.card h3{margin:0 0 5px}
-.meta{font-size:13px;color:#555;margin-bottom:5px}
-.tag{font-size:12px;background:#e5e7eb;padding:2px 6px;border-radius:4px;margin-right:4px}
-
-.actions{position:absolute;top:10px;right:10px;display:flex;gap:5px}
-.actions button{padding:5px 8px;font-size:12px}
-.star{background:#f59e0b}
-.delete{background:#ef4444}
-.edit{background:#10b981}
-
-.detail{margin-top:8px;font-size:14px;white-space:pre-wrap}
-
-.export-box{margin-top:20px}
-.export-box button{background:#111}
+.card{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;position:relative}
+.card h3{margin:0 0 6px;padding-right:148px;font-size:20px;line-height:1.3}
+.meta{font-size:13px;color:var(--muted);margin:6px 0}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}
+.tag{font-size:12px;background:#e8ebf0;padding:3px 7px;border-radius:4px;color:#343942}
+.actions{position:absolute;top:12px;right:12px;display:flex;gap:5px}
+.actions button{min-height:30px;padding:0 9px;font-size:12px}
+.star{background:var(--amber)}
+.delete{background:var(--red)}
+.edit{background:var(--green)}
+.detail{margin-top:8px;font-size:14px;line-height:1.6;white-space:pre-wrap}
+.link{display:inline-block;margin-top:8px;color:#1d4ed8;font-weight:700;text-decoration:none}
+.link:hover{text-decoration:underline}
+.export-box{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px}
+.export-box button,.dark{background:var(--ink)}
+.empty{padding:28px;text-align:center;border:1px dashed #b9c0cc;border-radius:8px;color:var(--muted);background:#fff}
+.notice{margin:0 0 12px;color:var(--muted);font-size:13px}
+@media (max-width:640px){
+  .form-grid{grid-template-columns:1fr}
+  .toolbar select{max-width:none}
+  .card h3{padding-right:0;margin-top:38px}
+  .actions{left:12px;right:auto}
+}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>📂 포트폴리오 기록 관리</h1>
+<main class="container">
+  <h1>포트폴리오 기록 관리</h1>
 
-<div class="input-box">
-<input id="title" placeholder="제목">
-<select id="category">
-<option value="영상">영상</option>
-<option value="대외활동">대외활동</option>
-<option value="알바">알바</option>
-<option value="학업">학업</option>
-</select>
-<input id="role" placeholder="역할">
-<input id="skills" placeholder="스킬 (쉼표로 구분)">
-<input id="dateStart" placeholder="시작 날짜">
-<input id="dateEnd" placeholder="종료 날짜">
-<textarea id="desc" placeholder="설명"></textarea>
-<input id="result" placeholder="성과">
-<input id="link" placeholder="링크 (선택)">
-<button onclick="add()">추가 / 수정</button>
-</div>
+  <section class="input-box" aria-label="포트폴리오 기록 입력">
+    <p class="notice" id="formStatus">새 기록을 추가하는 중입니다.</p>
+    <div class="form-grid">
+      <input id="title" placeholder="제목" autocomplete="off">
+      <select id="category">
+        <option value="영상">영상</option>
+        <option value="대외활동">대외활동</option>
+        <option value="알바">알바</option>
+        <option value="학업">학업</option>
+      </select>
+      <input id="role" placeholder="역할" autocomplete="off">
+      <input id="skills" placeholder="스킬 (쉼표로 구분)" autocomplete="off">
+      <input id="dateStart" type="date" aria-label="시작 날짜">
+      <input id="dateEnd" type="date" aria-label="종료 날짜">
+      <textarea id="desc" class="full" placeholder="설명"></textarea>
+      <input id="result" class="full" placeholder="성과" autocomplete="off">
+      <input id="link" class="full" placeholder="링크 (선택)" autocomplete="off">
+    </div>
+    <div class="toolbar" style="margin:12px 0 0">
+      <button type="button" id="saveButton" onclick="add()">추가</button>
+      <button type="button" class="dark" onclick="resetForm()">취소</button>
+    </div>
+  </section>
 
-<div class="toolbar">
-<input id="search" placeholder="검색" oninput="render()">
-<select id="filter" onchange="render()">
-<option value="all">전체</option>
-<option value="영상">영상</option>
-<option value="대외활동">대외활동</option>
-<option value="알바">알바</option>
-<option value="학업">학업</option>
-<option value="important">⭐ 중요만</option>
-</select>
-<button onclick="showPortfolio()">포트폴리오 보기</button>
-</div>
+  <section class="toolbar" aria-label="검색 및 필터">
+    <input id="search" placeholder="검색" oninput="render()">
+    <select id="filter" onchange="render()">
+      <option value="all">전체</option>
+      <option value="영상">영상</option>
+      <option value="대외활동">대외활동</option>
+      <option value="알바">알바</option>
+      <option value="학업">학업</option>
+      <option value="important">중요만</option>
+    </select>
+    <button type="button" onclick="showPortfolio()">포트폴리오 보기</button>
+  </section>
 
-<div class="list" id="list"></div>
+  <section class="list" id="list" aria-live="polite"></section>
 
-<div class="export-box">
-<button onclick="exportData()">데이터 다운로드(JSON)</button>
-<input type="file" onchange="importData(event)">
-</div>
-</div>
+  <section class="export-box" aria-label="데이터 백업">
+    <button type="button" onclick="exportData()">데이터 다운로드(JSON)</button>
+    <input id="importFile" type="file" accept="application/json,.json" onchange="importData(event)">
+  </section>
+</main>
 
 <script>
+const STORAGE_KEY = 'portfolio';
 let editId = null;
 
-function getData(){return JSON.parse(localStorage.getItem('portfolio'))||[]}
-function saveData(data){localStorage.setItem('portfolio', JSON.stringify(data))}
+const fields = {
+  title: document.getElementById('title'),
+  category: document.getElementById('category'),
+  role: document.getElementById('role'),
+  skills: document.getElementById('skills'),
+  dateStart: document.getElementById('dateStart'),
+  dateEnd: document.getElementById('dateEnd'),
+  desc: document.getElementById('desc'),
+  result: document.getElementById('result'),
+  link: document.getElementById('link')
+};
+
+function getData(){
+  try{
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  }catch{
+    return [];
+  }
+}
+
+function saveData(data){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function normalizeUrl(url){
+  const trimmed = url.trim();
+  if(!trimmed) return '';
+  if(/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
+function getFormItem(previous){
+  return {
+    id: editId || Date.now(),
+    title: fields.title.value.trim(),
+    category: fields.category.value,
+    role: fields.role.value.trim(),
+    skills: fields.skills.value.split(',').map(s=>s.trim()).filter(Boolean),
+    dateStart: fields.dateStart.value.trim(),
+    dateEnd: fields.dateEnd.value.trim(),
+    desc: fields.desc.value.trim(),
+    result: fields.result.value.trim(),
+    link: normalizeUrl(fields.link.value),
+    important: previous ? Boolean(previous.important) : false
+  };
+}
 
 function add(){
- const item={
-  id: editId || Date.now(),
-  title:title.value,
-  category:category.value,
-  role:role.value,
-  skills:skills.value.split(',').map(s=>s.trim()),
-  dateStart:dateStart.value,
-  dateEnd:dateEnd.value,
-  desc:desc.value,
-  result:result.value,
-  link:link.value,
-  important:false
- }
- let data=getData();
- if(editId){
-  data = data.map(v=>v.id===editId?item:v);
-  editId=null;
- } else {
-  data.push(item);
- }
- saveData(data);
- document.querySelectorAll('.input-box input, .input-box textarea').forEach(i=>i.value='');
- render();
+  const data = getData();
+  const previous = editId ? data.find(v=>v.id === editId) : null;
+  const item = getFormItem(previous);
+
+  if(!item.title){
+    alert('제목을 입력해 주세요.');
+    fields.title.focus();
+    return;
+  }
+
+  const nextData = editId
+    ? data.map(v=>v.id === editId ? item : v)
+    : [...data, item];
+
+  saveData(nextData);
+  resetForm();
+  render();
+}
+
+function resetForm(){
+  Object.values(fields).forEach(field=>{
+    if(field.tagName === 'SELECT') field.selectedIndex = 0;
+    else field.value = '';
+  });
+  editId = null;
+  document.getElementById('saveButton').textContent = '추가';
+  document.getElementById('formStatus').textContent = '새 기록을 추가하는 중입니다.';
 }
 
 function editItem(id){
- const v = getData().find(x=>x.id===id);
- title.value=v.title;
- category.value=v.category;
- role.value=v.role;
- skills.value=v.skills.join(', ');
- dateStart.value=v.dateStart;
- dateEnd.value=v.dateEnd;
- desc.value=v.desc;
- result.value=v.result;
- link.value=v.link;
- editId=id;
+  const v = getData().find(x=>x.id === id);
+  if(!v) return;
+  fields.title.value = v.title || '';
+  fields.category.value = v.category || '영상';
+  fields.role.value = v.role || '';
+  fields.skills.value = Array.isArray(v.skills) ? v.skills.join(', ') : '';
+  fields.dateStart.value = v.dateStart || '';
+  fields.dateEnd.value = v.dateEnd || '';
+  fields.desc.value = v.desc || '';
+  fields.result.value = v.result || '';
+  fields.link.value = v.link || '';
+  editId = id;
+  document.getElementById('saveButton').textContent = '수정 저장';
+  document.getElementById('formStatus').textContent = `"${v.title}" 기록을 수정하는 중입니다.`;
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function toggleStar(id){
- const data=getData().map(v=>v.id===id?{...v,important:!v.important}:v);
- saveData(data);
- render();
+  const data = getData().map(v=>v.id === id ? {...v, important: !v.important} : v);
+  saveData(data);
+  render();
 }
 
 function remove(id){
- const data=getData().filter(v=>v.id!==id);
- saveData(data);
- render();
+  const item = getData().find(v=>v.id === id);
+  if(!item || !confirm(`"${item.title}" 기록을 삭제할까요?`)) return;
+  saveData(getData().filter(v=>v.id !== id));
+  if(editId === id) resetForm();
+  render();
+}
+
+function appendText(parent, tag, text, className){
+  const el = document.createElement(tag);
+  if(className) el.className = className;
+  el.textContent = text;
+  parent.appendChild(el);
+  return el;
+}
+
+function createCard(v, withActions = true){
+  const el = document.createElement('article');
+  el.className = 'card';
+
+  if(withActions){
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    actions.innerHTML = `
+      <button type="button" class="star" aria-label="중요 표시">${v.important ? '★' : '☆'}</button>
+      <button type="button" class="edit">수정</button>
+      <button type="button" class="delete">삭제</button>
+    `;
+    actions.querySelector('.star').onclick = ()=>toggleStar(v.id);
+    actions.querySelector('.edit').onclick = ()=>editItem(v.id);
+    actions.querySelector('.delete').onclick = ()=>remove(v.id);
+    el.appendChild(actions);
+  }
+
+  appendText(el, 'h3', v.title || '제목 없음');
+  appendText(el, 'div', `${v.category || '분류 없음'} | ${v.dateStart || '-'} ~ ${v.dateEnd || '-'}`, 'meta');
+
+  const tags = document.createElement('div');
+  tags.className = 'tags';
+  (Array.isArray(v.skills) ? v.skills : []).forEach(skill=>appendText(tags, 'span', skill, 'tag'));
+  el.appendChild(tags);
+
+  if(v.desc) appendText(el, 'div', v.desc, 'detail');
+  if(v.role) appendText(el, 'div', `역할: ${v.role}`, 'meta');
+  if(v.result) appendText(el, 'div', `성과: ${v.result}`, 'meta');
+  if(v.link){
+    const link = appendText(el, 'a', '링크 보기', 'link');
+    link.href = v.link;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+  return el;
+}
+
+function getFilteredData(){
+  const keyword = document.getElementById('search').value.trim().toLowerCase();
+  const filterVal = document.getElementById('filter').value;
+  return getData().filter(v=>{
+    const haystack = [v.title, v.desc, v.role, v.result, ...(Array.isArray(v.skills) ? v.skills : [])]
+      .join(' ')
+      .toLowerCase();
+    const matchKeyword = !keyword || haystack.includes(keyword);
+    const matchFilter = filterVal === 'all'
+      ? true
+      : filterVal === 'important'
+        ? v.important
+        : v.category === filterVal;
+    return matchKeyword && matchFilter;
+  });
 }
 
 function render(){
- const data=getData();
- const keyword=search.value.toLowerCase();
- const filterVal=filter.value;
+  const container = document.getElementById('list');
+  const filtered = getFilteredData().slice().reverse();
+  container.replaceChildren();
 
- let filtered=data.filter(v=>{
-  const matchKeyword = v.title.toLowerCase().includes(keyword) || v.desc.toLowerCase().includes(keyword);
-  const matchFilter =
-   filterVal==='all' ? true :
-   filterVal==='important' ? v.important :
-   v.category===filterVal;
-  return matchKeyword && matchFilter;
- });
+  if(!filtered.length){
+    appendText(container, 'div', '표시할 기록이 없습니다.', 'empty');
+    return;
+  }
 
- list.innerHTML='';
- filtered.slice().reverse().forEach(v=>{
-  const el=document.createElement('div');
-  el.className='card';
-  el.innerHTML=`
-   <div class="actions">
-    <button class="star" onclick="toggleStar(${v.id})">${v.important?'★':'☆'}</button>
-    <button class="edit" onclick="editItem(${v.id})">수정</button>
-    <button class="delete" onclick="remove(${v.id})">삭제</button>
-   </div>
-   <h3>${v.title}</h3>
-   <div class="meta">${v.category} | ${v.dateStart} ~ ${v.dateEnd}</div>
-   <div>${v.skills.map(s=>`<span class='tag'>${s}</span>`).join('')}</div>
-   <div class="detail">${v.desc}</div>
-   <div class="meta">🎬 ${v.role}</div>
-   <div class="meta">📊 ${v.result}</div>
-   ${v.link?`<a href="${v.link}" target="_blank">링크 보기</a>`:''}
-  `;
-  list.appendChild(el);
- });
+  filtered.forEach(v=>container.appendChild(createCard(v)));
 }
 
 function showPortfolio(){
- const data=getData().filter(v=>v.important);
- list.innerHTML='';
- data.forEach(v=>{
-  const el=document.createElement('div');
-  el.className='card';
-  el.innerHTML=`
-   <h3>${v.title}</h3>
-   <div class="meta">${v.dateStart} ~ ${v.dateEnd}</div>
-   <div class="detail">${v.desc}</div>
-   <div class="meta">🎬 ${v.role}</div>
-   <div class="meta">📊 ${v.result}</div>
-  `;
-  list.appendChild(el);
- });
+  const container = document.getElementById('list');
+  const important = getData().filter(v=>v.important);
+  container.replaceChildren();
+
+  if(!important.length){
+    appendText(container, 'div', '중요 표시된 기록이 없습니다.', 'empty');
+    return;
+  }
+
+  important.forEach(v=>container.appendChild(createCard(v, false)));
 }
 
 function exportData(){
- const data = JSON.stringify(getData());
- const blob = new Blob([data], {type:"application/json"});
- const a = document.createElement('a');
- a.href = URL.createObjectURL(blob);
- a.download = 'portfolio.json';
- a.click();
+  const data = JSON.stringify(getData(), null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function importData(e){
- const file = e.target.files[0];
- const reader = new FileReader();
- reader.onload = ()=>{
-  localStorage.setItem('portfolio', reader.result);
-  render();
- };
- reader.readAsText(file);
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!Array.isArray(parsed)) throw new Error('Invalid portfolio data');
+      saveData(parsed);
+      resetForm();
+      render();
+    }catch{
+      alert('가져올 수 없는 JSON 파일입니다.');
+    }finally{
+      e.target.value = '';
+    }
+  };
+  reader.readAsText(file);
 }
 
 render();
