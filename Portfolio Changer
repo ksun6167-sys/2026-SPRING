@@ -101,6 +101,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .outline-item{border:1px solid var(--line);border-radius:8px;background:#fafafa;padding:14px}
 .outline-item h3{margin:0 0 8px;font-size:16px}
 .outline-item p{margin:0;color:#343942;line-height:1.6}
+.check-list{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fafafa}
+.check-ok{color:#047857;font-weight:800}
+.check-miss{color:#b91c1c;font-weight:800}
+.export-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 @media (max-width:640px){
   .tabs{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
@@ -237,10 +242,21 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
   <section class="outline-box" aria-label="자기소개서 개요 생성">
     <div class="analysis-head">
-      <h2>자기소개서 개요 AI 생성</h2>
-      <button type="button" onclick="generateCoverLetterOutline()">개요 생성</button>
+      <h2>맞춤형 자기소개서 도구</h2>
+      <button type="button" onclick="generateCoverLetterOutline()">맞춤 개요 생성</button>
+    </div>
+    <div class="form-grid">
+      <input id="coverTarget" placeholder="지원 직무 / 회사 / 분야" autocomplete="off">
+      <input id="coverTone" placeholder="원하는 톤 (예: 담백하게, 열정적으로)" autocomplete="off">
+      <textarea id="coverQuestion" class="full" placeholder="자기소개서 문항을 입력하세요. 예: 지원동기와 입사 후 포부를 작성하세요."></textarea>
+    </div>
+    <div class="export-actions">
+      <button type="button" class="dark" onclick="checkCompleteness()">완성도 점검</button>
+      <button type="button" onclick="exportOutlineText()">텍스트 내보내기</button>
+      <button type="button" onclick="printOutlinePdf()">PDF로 저장/인쇄</button>
     </div>
     <div id="outlineResult" class="empty">인적사항, 포트폴리오, 자유경험을 바탕으로 자기소개서 개요를 만들어 줍니다.</div>
+    <div id="completenessResult" style="margin-top:12px"></div>
   </section>
 </main>
 
@@ -309,6 +325,15 @@ function switchTab(tabName){
 function getProfile(){
   const data = readJson(PROFILE_KEY, {});
   return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+}
+
+function getProfileDraft(){
+  const saved = getProfile();
+  const draft = {...saved};
+  Object.entries(profileFields).forEach(([key, field])=>{
+    if(field.value.trim()) draft[key] = field.value.trim();
+  });
+  return draft;
 }
 
 function saveProfileData(data){
@@ -1034,7 +1059,7 @@ function getExperienceText(data){
 }
 
 function getCombinedText(){
-  const profile = getProfile();
+  const profile = getProfileDraft();
   return [
     profile.education,
     profile.major,
@@ -1080,6 +1105,68 @@ function getImportantMaterials(){
   return {portfolios, experiences};
 }
 
+function getCoverInputs(){
+  return {
+    target: document.getElementById('coverTarget').value.trim(),
+    question: document.getElementById('coverQuestion').value.trim(),
+    tone: document.getElementById('coverTone').value.trim()
+  };
+}
+
+function getQuestionType(question){
+  const text = question.toLowerCase();
+  if(text.includes('지원동기') || text.includes('지원 동기') || text.includes('포부')) return 'motivation';
+  if(text.includes('직무') || text.includes('역량') || text.includes('강점')) return 'competency';
+  if(text.includes('협업') || text.includes('갈등') || text.includes('소통')) return 'collaboration';
+  if(text.includes('성장') || text.includes('가치관') || text.includes('성격')) return 'growth';
+  if(text.includes('실패') || text.includes('도전') || text.includes('문제')) return 'challenge';
+  return 'general';
+}
+
+function scoreMaterialForQuestion(item, questionType){
+  const text = [
+    item.title,
+    item.category,
+    item.type,
+    item.role,
+    Array.isArray(item.skills) ? item.skills.join(' ') : '',
+    Array.isArray(item.keywords) ? item.keywords.join(' ') : '',
+    item.desc,
+    item.result,
+    item.situation,
+    item.action
+  ].join(' ').toLowerCase();
+  const rules = {
+    motivation: ['관심','지원','직무','목표','전공','기획','콘텐츠','성장'],
+    competency: ['역할','스킬','성과','분석','제작','기획','개선','결과'],
+    collaboration: ['협업','팀','소통','조율','갈등','회의','리더','역할'],
+    growth: ['성장','가치관','학습','배운','성격','책임','꾸준','도전'],
+    challenge: ['도전','실패','문제','해결','개선','피드백','보완','결과'],
+    general: ['기획','성과','협업','성장','문제','역할','스킬']
+  };
+  return countMatches(text, rules[questionType] || rules.general) + (item.important ? 3 : 0);
+}
+
+function getRecommendedMaterials(questionType){
+  const portfolioMaterials = getData().map(item=>({
+    title: item.title,
+    kind: '포트폴리오',
+    detail: item.result || item.desc || item.role || '',
+    score: scoreMaterialForQuestion(item, questionType)
+  }));
+  const experienceMaterials = getExperiences().map(item=>({
+    title: item.title,
+    kind: '자유경험',
+    detail: item.result || item.action || item.situation || '',
+    score: scoreMaterialForQuestion(item, questionType)
+  }));
+
+  return [...portfolioMaterials, ...experienceMaterials]
+    .filter(item=>item.title)
+    .sort((a,b)=>b.score - a.score)
+    .slice(0, 4);
+}
+
 function createOutlineItem(title, body){
   const item = document.createElement('article');
   item.className = 'outline-item';
@@ -1092,7 +1179,7 @@ function generateCoverLetterOutline(force = true){
   const result = document.getElementById('outlineResult');
   if(!force && result.dataset.generated !== 'true') return;
 
-  const profile = getProfile();
+  const profile = getProfileDraft();
   const portfolios = getData();
   const experiences = getExperiences();
   const hasData = Object.values(profile).some(Boolean) || portfolios.length || experiences.length;
@@ -1110,33 +1197,177 @@ function generateCoverLetterOutline(force = true){
   const jobs = analyzeJobs(portfolios);
   const strengths = getCombinedStrengths();
   const materials = getImportantMaterials();
-  const target = profile.target || (jobs[0] ? jobs[0].name : '지원 직무');
+  const coverInputs = getCoverInputs();
+  const questionType = getQuestionType(coverInputs.question);
+  const recommendedMaterials = getRecommendedMaterials(questionType);
+  const target = coverInputs.target || profile.target || (jobs[0] ? jobs[0].name : '지원 직무');
   const major = profile.major || profile.education || '나의 배경';
   const topStrengths = strengths.length ? strengths.slice(0, 3).join(', ') : '성실함, 책임감, 성장 가능성';
-  const mainPortfolio = materials.portfolios[0] || '대표 포트폴리오';
-  const mainExperience = materials.experiences[0] || '자유경험 기록';
+  const mainPortfolio = recommendedMaterials.find(v=>v.kind === '포트폴리오')?.title || materials.portfolios[0] || '대표 포트폴리오';
+  const mainExperience = recommendedMaterials.find(v=>v.kind === '자유경험')?.title || materials.experiences[0] || '자유경험 기록';
+  const questionText = coverInputs.question || '자기소개서 문항';
+  const tone = coverInputs.tone || '담백하고 구체적인';
+  const questionPlans = {
+    motivation: [
+      ['1. 지원동기: 관심이 생긴 계기', `${major}과 기록된 경험을 연결해 ${target}에 관심을 갖게 된 이유를 ${tone} 톤으로 시작합니다.`],
+      ['2. 직무 이해: 내가 본 핵심 역량', `${target}에서 중요하다고 보는 역량을 ${topStrengths} 중심으로 정리합니다.`],
+      ['3. 근거 경험: 대표 포트폴리오', `${mainPortfolio} 경험을 통해 관심이 행동으로 이어졌다는 점을 보여줍니다.`],
+      ['4. 입사 후 포부', `앞으로 ${target}에서 배우고 확장하고 싶은 방향을 구체적인 기여 방식으로 마무리합니다.`]
+    ],
+    competency: [
+      ['1. 결론: 나의 핵심 역량', `${target}에 맞는 강점을 ${topStrengths}로 먼저 제시합니다.`],
+      ['2. 근거 1: 포트폴리오 성과', `${mainPortfolio}에서 맡은 역할, 사용한 스킬, 결과를 순서대로 씁니다.`],
+      ['3. 근거 2: 경험에서 드러난 태도', `${mainExperience}를 통해 문제 해결 과정이나 협업 태도를 보완 근거로 제시합니다.`],
+      ['4. 직무 적용', `이 역량을 ${target} 업무에서 어떻게 활용할지 연결합니다.`]
+    ],
+    collaboration: [
+      ['1. 상황 소개', `${mainExperience}에서 협업이나 갈등이 있었던 상황을 간단히 설명합니다.`],
+      ['2. 나의 행동', `조율, 소통, 역할 분담처럼 직접 한 행동을 구체적으로 씁니다.`],
+      ['3. 결과와 배운 점', `결과뿐 아니라 이후 협업 방식이 어떻게 달라졌는지 정리합니다.`],
+      ['4. 직무 연결', `${target}에서도 같은 태도로 기여하겠다는 문장으로 마무리합니다.`]
+    ],
+    growth: [
+      ['1. 나를 설명하는 키워드', `${topStrengths} 중 가장 잘 맞는 키워드 하나로 시작합니다.`],
+      ['2. 형성 배경', `${major} 또는 자유경험에서 그 성향이 만들어진 배경을 설명합니다.`],
+      ['3. 대표 사례', `${mainExperience}를 사례로 들어 행동과 배운 점을 정리합니다.`],
+      ['4. 현재의 강점', `그 경험이 지금 ${target}에 어떤 강점으로 이어졌는지 마무리합니다.`]
+    ],
+    challenge: [
+      ['1. 도전/문제 상황', `${mainExperience} 또는 ${mainPortfolio}에서 어려웠던 지점을 구체적으로 제시합니다.`],
+      ['2. 해결 과정', `시도한 방법, 수정한 부분, 주변 피드백을 반영한 과정을 씁니다.`],
+      ['3. 결과', `성과나 배운 점을 수치, 변화, 완성물 중심으로 정리합니다.`],
+      ['4. 재발 방지와 성장', `이 경험 이후 일하는 방식이 어떻게 나아졌는지 연결합니다.`]
+    ],
+    general: [
+      ['1. 도입: 문항에 대한 한 문장 답', `"${questionText}"에 대해 가장 먼저 말하고 싶은 결론을 씁니다.`],
+      ['2. 핵심 강점', `${topStrengths}을 중심으로 나의 방향성을 정리합니다.`],
+      ['3. 대표 경험 1', `${mainPortfolio}를 직무 역량의 근거로 사용합니다.`],
+      ['4. 대표 경험 2', `${mainExperience}를 태도와 성장의 근거로 사용합니다.`],
+      ['5. 마무리', `${target}에서 이 경험을 어떻게 이어갈지 정리합니다.`]
+    ]
+  };
 
   const list = document.createElement('div');
   list.className = 'outline-list';
-  [
-    ['1. 도입: 지원 분야와 나의 방향성', `${profile.name ? profile.name + '은/는 ' : ''}${major}을 바탕으로 ${target} 분야에 관심을 갖게 되었음을 밝힙니다. 관심이 단순한 희망이 아니라 실제 기록과 경험으로 이어졌다는 흐름을 첫 문단에서 잡습니다.`],
-    ['2. 핵심 강점', `${topStrengths}을 핵심 키워드로 잡고, 주장만 쓰기보다 포트폴리오와 자유경험에서 확인되는 행동을 근거로 연결합니다.`],
-    ['3. 대표 경험 1: 포트폴리오', `${mainPortfolio} 경험을 중심 사례로 사용합니다. 맡은 역할, 사용한 스킬, 결과를 순서대로 정리하면 직무 역량을 보여주는 문단이 됩니다.`],
-    ['4. 대표 경험 2: 자유경험', `${mainExperience} 경험에서는 상황, 행동, 결과/배운 점을 STAR 구조로 정리합니다. 성격의 장점이나 협업 태도를 보여주는 문단으로 쓰기 좋습니다.`],
-    ['5. 마무리: 입사 후 기여 방향', `${target}에서 지금까지 쌓은 경험을 어떻게 확장할지 씁니다. 앞으로 배우고 싶은 점과 조직에 기여할 수 있는 방식을 한 문단으로 정리합니다.`]
-  ].forEach(([title, body])=>list.appendChild(createOutlineItem(title, body)));
+  appendText(list, 'div', `문항: ${questionText}`, 'notice');
+  appendText(list, 'div', `지원 대상: ${target} / 추천 톤: ${tone}`, 'notice');
+  questionPlans[questionType].forEach(([title, body])=>list.appendChild(createOutlineItem(title, body)));
 
   const materialPanel = document.createElement('div');
   materialPanel.className = 'analysis-panel';
   appendText(materialPanel, 'h3', '개요에 넣기 좋은 재료');
   appendKeywordList(materialPanel, [
     ...strengths.slice(0, 5),
-    ...materials.portfolios.slice(0, 2),
-    ...materials.experiences.slice(0, 2)
+    ...recommendedMaterials.map(v=>`${v.kind}: ${v.title}`)
   ].filter(Boolean));
 
   result.dataset.generated = 'true';
   result.append(list, materialPanel);
+}
+
+function createCheckItem(label, ok, advice){
+  const item = document.createElement('div');
+  item.className = 'check-item';
+  const text = document.createElement('div');
+  appendText(text, 'strong', label);
+  appendText(text, 'div', advice, 'meta');
+  appendText(item, 'span', ok ? '완료' : '보완', ok ? 'check-ok' : 'check-miss');
+  item.prepend(text);
+  return item;
+}
+
+function checkCompleteness(){
+  const result = document.getElementById('completenessResult');
+  const profile = getProfileDraft();
+  const portfolios = getData();
+  const experiences = getExperiences();
+  const coverInputs = getCoverInputs();
+  const completePortfolios = portfolios.filter(v=>v.title && v.role && v.skills?.length && v.desc && v.result);
+  const completeExperiences = experiences.filter(v=>v.title && v.situation && v.action && v.result);
+  const importantCount = portfolios.filter(v=>v.important).length + experiences.filter(v=>v.important).length;
+
+  const checks = [
+    ['지원 직무 입력', Boolean(coverInputs.target || profile.target), '희망 직무나 회사/분야를 입력하면 개요가 더 정확해집니다.'],
+    ['자소서 문항 입력', Boolean(coverInputs.question), '실제 문항을 넣으면 지원동기, 협업, 직무역량 등 문항 유형에 맞춰 개요가 바뀝니다.'],
+    ['인적사항 핵심 정보', Boolean(profile.name && (profile.education || profile.major)), '이름과 학력/전공 또는 관심 분야가 있으면 도입 문단을 만들기 좋습니다.'],
+    ['포트폴리오 기록', portfolios.length >= 2, '최소 2개 이상 기록하면 대표 경험을 고르기 쉬워집니다.'],
+    ['완성된 포트폴리오', completePortfolios.length >= 1, '제목, 역할, 스킬, 설명, 성과가 모두 있는 포트폴리오가 1개 이상이면 좋습니다.'],
+    ['자유경험 STAR 구성', completeExperiences.length >= 1, '상황, 행동, 결과/배운 점이 모두 있는 자유경험이 1개 이상이면 자소서 근거가 탄탄해집니다.'],
+    ['중요 표시', importantCount >= 1, '자기소개서에 꼭 쓰고 싶은 경험은 별표로 표시해 주세요.'],
+    ['성과 구체화', portfolios.some(v=>/\d|%|명|회|개|원|시간|개월|년/.test(v.result || '')), '성과에 숫자나 규모가 있으면 문장이 훨씬 설득력 있어집니다.']
+  ];
+
+  const done = checks.filter(([,ok])=>ok).length;
+  result.replaceChildren();
+  const panel = document.createElement('div');
+  panel.className = 'analysis-panel';
+  appendText(panel, 'h3', `완성도 점검: ${done}/${checks.length}`);
+  const list = document.createElement('div');
+  list.className = 'check-list';
+  checks.forEach(([label, ok, advice])=>list.appendChild(createCheckItem(label, ok, advice)));
+  panel.appendChild(list);
+  result.appendChild(panel);
+}
+
+function getOutlineText(){
+  const outline = document.getElementById('outlineResult');
+  const completeness = document.getElementById('completenessResult');
+  const title = '자기소개서 맞춤 개요';
+  const outlineText = outline.classList.contains('empty') ? '' : outline.innerText.trim();
+  const completenessText = completeness.innerText.trim();
+  return [title, outlineText, completenessText].filter(Boolean).join('\n\n');
+}
+
+function exportOutlineText(){
+  if(document.getElementById('outlineResult').classList.contains('empty')){
+    generateCoverLetterOutline();
+  }
+  const text = getOutlineText();
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cover-letter-outline.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function printOutlinePdf(){
+  if(document.getElementById('outlineResult').classList.contains('empty')){
+    generateCoverLetterOutline();
+  }
+  const text = getOutlineText().replace(/[&<>"']/g, char=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[char]));
+  const printWindow = window.open('', '_blank');
+  if(!printWindow){
+    alert('팝업이 차단되어 PDF 창을 열 수 없습니다.');
+    return;
+  }
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+      <meta charset="UTF-8">
+      <title>자기소개서 맞춤 개요</title>
+      <style>
+        body{font-family:Arial,"Noto Sans KR",sans-serif;line-height:1.7;color:#111827;padding:32px}
+        h1{font-size:24px;margin:0 0 18px}
+        pre{white-space:pre-wrap;font:inherit}
+      </style>
+    </head>
+    <body>
+      <h1>자기소개서 맞춤 개요</h1>
+      <pre>${text}</pre>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
 }
 
 function exportData(){
