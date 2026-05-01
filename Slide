@@ -3,102 +3,411 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>포트폴리오 슬라이드</title>
+<title>자기소개서 포트폴리오 관리</title>
 <style>
 :root{
-  --bg:#0f172a;
-  --slide:#f8fafc;
-  --text:#111827;
-  --muted:#64748b;
-  --line:#dbe3ee;
+  color-scheme:light;
+  --bg:#f4f5f7;
+  --panel:#ffffff;
+  --text:#15171a;
+  --muted:#626975;
+  --line:#d7dbe2;
   --blue:#2563eb;
-  --teal:#0f766e;
-  --amber:#b45309;
+  --green:#0f9f6e;
+  --red:#dc2626;
+  --amber:#d97706;
+  --ink:#111827;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
-body.template-media{--bg:#18181b;--blue:#be123c;--teal:#7c3aed;--amber:#ea580c}
-body.template-report{--bg:#1f2937;--blue:#0f766e;--teal:#0369a1;--amber:#854d0e}
-.stage{min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;gap:16px;padding:18px}
-.topbar,.controls{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#e5e7eb}
-.topbar h1{margin:0;font-size:18px}
-.topbar a,.topbar button,.controls button{min-height:38px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:#1e293b;color:#f8fafc;padding:0 12px;text-decoration:none;font-weight:700;cursor:pointer}
-.deck-wrap{display:flex;align-items:center;justify-content:center;min-height:0}
-#deck{width:100%;display:flex;justify-content:center}
-.slide{width:min(1120px,100%);aspect-ratio:16/9;background:var(--slide);border-radius:10px;box-shadow:0 24px 80px rgba(0,0,0,.35);padding:48px;display:none;overflow:hidden}
-.slide.active{display:flex;flex-direction:column}
-.slide-title{font-size:42px;line-height:1.15;margin:0 0 18px;color:#0f172a}
-.subtitle{font-size:20px;color:var(--muted);line-height:1.5;margin:0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:24px}
-.panel{border:1px solid var(--line);border-radius:10px;background:#fff;padding:20px}
-.panel h2{margin:0 0 12px;font-size:22px}
-.meta{color:var(--muted);font-size:15px;line-height:1.6}
-.big-list{display:flex;flex-direction:column;gap:12px;margin-top:20px}
-.item{border-left:5px solid var(--blue);background:#fff;border-radius:8px;padding:16px 18px}
-.item h2{margin:0 0 8px;font-size:24px}
-.tags{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
-.tag{background:#dbeafe;color:#1e3a8a;border-radius:999px;padding:6px 10px;font-size:14px;font-weight:800}
-.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:auto}
-.kpi div{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:18px}
-.kpi strong{display:block;font-size:34px;color:var(--blue);line-height:1}
-.kpi span{display:block;margin-top:8px;color:#475569}
-.portfolio-body{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;min-height:0}
-.portfolio-body p{font-size:18px;line-height:1.65;margin:0}
-.result{margin-top:16px;border-radius:10px;background:#ecfdf5;border:1px solid #99f6e4;padding:16px;color:#134e4a;font-weight:800}
-.experience-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
-.step{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
-.step strong{display:block;color:var(--teal);margin-bottom:8px}
-.footer-note{margin-top:auto;color:var(--muted);font-size:14px}
-.counter{font-weight:800}
-.empty{margin:auto;text-align:center;color:#e5e7eb}
-.empty h2{font-size:28px}
-@media (max-width:760px){
-  .stage{padding:10px}
-  .slide{padding:24px;aspect-ratio:auto;min-height:70vh}
-  .slide-title{font-size:30px}
-  .grid,.portfolio-body,.experience-steps,.kpi{grid-template-columns:1fr}
-}
-@media print{
-  body{background:#fff}
-  .topbar,.controls{display:none}
-  .stage{display:block;padding:0}
-  .deck-wrap{display:block}
-  .slide{display:flex !important;box-shadow:none;border-radius:0;width:100%;height:100vh;page-break-after:always}
+.container{max-width:1040px;margin:0 auto;padding:28px 18px 40px}
+h1{text-align:center;margin:0 0 22px;font-size:28px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.tab-button{background:#e5e7eb;color:#343942;border:1px solid #d1d5db}
+.tab-button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.section-title h2{margin:0;font-size:20px}
+.section-title button{min-height:34px}
+.collapsible.collapsed .collapsible-body{display:none}
+.collapse-toggle{background:#e5e7eb;color:#343942;border:1px solid #d1d5db}
+.profile-switcher{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.profile-switcher select{flex:1 1 260px}
+.input-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.full{grid-column:1/-1}
+input,textarea,select{width:100%;padding:10px;border-radius:6px;border:1px solid #c7ccd5;background:#fff;color:var(--text);font:inherit}
+textarea{min-height:96px;resize:vertical}
+button{min-height:40px;padding:0 13px;border:none;border-radius:6px;background:var(--blue);color:#fff;cursor:pointer;font-weight:700}
+button:hover{filter:brightness(.95)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid rgba(37,99,235,.25);outline-offset:1px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.toolbar input{flex:1 1 240px}
+.toolbar select{max-width:180px}
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;position:relative}
+.card h3{margin:0 0 6px;padding-right:148px;font-size:20px;line-height:1.3}
+.meta{font-size:13px;color:var(--muted);margin:6px 0}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}
+.tag{font-size:12px;background:#e8ebf0;padding:3px 7px;border-radius:4px;color:#343942}
+.badge{font-size:12px;border-radius:999px;padding:4px 8px;font-weight:800}
+.badge-ok{background:#dcfce7;color:#166534}
+.badge-warn{background:#fef3c7;color:#92400e}
+.badge-miss{background:#fee2e2;color:#991b1b}
+.actions{position:absolute;top:12px;right:12px;display:flex;gap:5px}
+.actions button{min-height:30px;padding:0 9px;font-size:12px}
+.star{background:var(--amber)}
+.delete{background:var(--red)}
+.edit{background:var(--green)}
+.detail{margin-top:8px;font-size:14px;line-height:1.6;white-space:pre-wrap}
+.link{display:inline-block;margin-top:8px;color:#1d4ed8;font-weight:700;text-decoration:none}
+.link:hover{text-decoration:underline}
+.export-box{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px}
+.export-box button,.dark{background:var(--ink)}
+.empty{padding:28px;text-align:center;border:1px dashed #b9c0cc;border-radius:8px;color:var(--muted);background:#fff}
+.notice{margin:0 0 12px;color:var(--muted);font-size:13px}
+.analysis-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin:0 0 18px}
+.analysis-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.analysis-head h2{margin:0;font-size:20px}
+.analysis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.analysis-panel{border:1px solid var(--line);border-radius:8px;padding:14px;background:#fafafa}
+.analysis-panel h3{margin:0 0 10px;font-size:16px}
+.recommend-list{display:flex;flex-direction:column;gap:8px}
+.recommend-item{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #e4e7ec;padding-bottom:8px}
+.recommend-item:last-child{border-bottom:none;padding-bottom:0}
+.score{font-size:12px;color:#fff;background:var(--blue);border-radius:999px;padding:3px 8px;white-space:nowrap}
+.keyword-list{display:flex;gap:6px;flex-wrap:wrap}
+.keyword{background:#dbeafe;color:#1e3a8a;border-radius:999px;padding:5px 9px;font-size:13px;font-weight:700}
+.sentence{margin:10px 0 0;color:#343942;line-height:1.6;font-size:14px}
+.visual-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin:0 0 18px}
+.visual-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.visual-head h2{margin:0;font-size:20px}
+.visual-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.visual-panel{border:1px solid var(--line);border-radius:8px;padding:14px;background:#fafafa;min-height:170px}
+.visual-panel h3{margin:0 0 12px;font-size:16px}
+.stat-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stat-card{background:#eef2ff;border:1px solid #d9e0ff;border-radius:8px;padding:12px}
+.stat-value{display:block;font-size:24px;font-weight:800;color:#1d4ed8;line-height:1}
+.stat-label{display:block;margin-top:6px;font-size:12px;color:#4b5563}
+.bar-list{display:flex;flex-direction:column;gap:9px}
+.bar-label{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px;font-size:13px;color:#343942}
+.bar-track{height:12px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#14b8a6)}
+.skill-cloud{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;min-height:100px}
+.skill-bubble{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#ecfeff;color:#155e75;border:1px solid #a5f3fc;font-weight:800;line-height:1;padding:8px 10px}
+.timeline{display:flex;flex-direction:column;gap:10px}
+.timeline-item{display:grid;grid-template-columns:minmax(86px,130px) 1fr;gap:10px;align-items:center}
+.timeline-title{font-size:13px;color:#343942;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timeline-track{height:18px;background:#e5e7eb;border-radius:999px;overflow:hidden;position:relative}
+.timeline-fill{position:absolute;top:0;bottom:0;min-width:8px;border-radius:999px;background:#10b981}
+.profile-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.profile-item{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px}
+.profile-item strong{display:block;margin-bottom:4px;font-size:12px;color:#4b5563}
+.experience-list{display:flex;flex-direction:column;gap:10px}
+.outline-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin:18px 0 0}
+.outline-list{display:flex;flex-direction:column;gap:10px}
+.outline-item{border:1px solid var(--line);border-radius:8px;background:#fafafa;padding:14px}
+.outline-item h3{margin:0 0 8px;font-size:16px}
+.outline-item p{margin:0;color:#343942;line-height:1.6}
+.check-list{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fafafa}
+.check-ok{color:#047857;font-weight:800}
+.check-miss{color:#b91c1c;font-weight:800}
+.export-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.application-list{display:flex;flex-direction:column;gap:10px}
+.status-chip{display:inline-flex;align-items:center;border-radius:999px;background:#eef2ff;color:#3730a3;padding:4px 9px;font-size:12px;font-weight:800}
+.draft-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.backup-note{font-size:13px;color:var(--muted)}
+@media (max-width:640px){
+  .tabs{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .analysis-grid{grid-template-columns:1fr}
+  .visual-grid{grid-template-columns:1fr}
+  .stat-row{grid-template-columns:1fr}
+  .timeline-item{grid-template-columns:1fr}
+  .profile-summary{grid-template-columns:1fr}
+  .draft-grid{grid-template-columns:1fr}
+  .toolbar select{max-width:none}
+  .card h3{padding-right:0;margin-top:38px}
+  .actions{left:12px;right:auto}
 }
 </style>
 </head>
 <body>
-<main class="stage">
-  <header class="topbar">
-    <h1>포트폴리오 슬라이드</h1>
-    <div>
-      <a href="index.html">관리 페이지</a>
-      <button type="button" onclick="window.print()">PDF 저장</button>
-    </div>
-  </header>
+<main class="container">
+  <h1>자기소개서 포트폴리오 관리</h1>
 
-  <section class="deck-wrap">
-    <div id="deck"></div>
-    <div id="empty" class="empty" hidden>
-      <h2>슬라이드로 만들 데이터가 없습니다.</h2>
-      <p>관리 페이지에서 인적사항, 포트폴리오, 자유경험을 입력해 주세요.</p>
+  <section class="profile-switcher" aria-label="현재 인적사항 선택">
+    <select id="activeProfile" onchange="setActiveProfile(this.value)"></select>
+    <button type="button" onclick="newProfile()">새 인적사항</button>
+    <button type="button" class="delete" onclick="deleteActiveProfile()">현재 인적사항 삭제</button>
+  </section>
+
+  <nav class="tabs" aria-label="기록 탭">
+    <button type="button" class="tab-button active" data-tab="profile" onclick="switchTab('profile')">인적사항</button>
+    <button type="button" class="tab-button" data-tab="portfolio" onclick="switchTab('portfolio')">포트폴리오</button>
+    <button type="button" class="tab-button" data-tab="experience" onclick="switchTab('experience')">자유경험</button>
+    <button type="button" class="tab-button" data-tab="application" onclick="switchTab('application')">지원공고</button>
+  </nav>
+
+  <section id="tab-profile" class="tab-panel active" aria-label="인적사항">
+    <section class="input-box">
+      <div class="section-title">
+        <h2>인적사항</h2>
+        <div class="toolbar" style="margin:0">
+          <button type="button" class="collapse-toggle" onclick="toggleSection('profileForm')">열기/닫기</button>
+          <button type="button" onclick="saveProfile()">저장하고 기록 입력</button>
+        </div>
+      </div>
+      <div id="profileForm" class="collapsible-body">
+      <div class="form-grid">
+        <input id="profileName" placeholder="이름" autocomplete="off">
+        <input id="profileBirth" type="date" aria-label="생년월일">
+        <input id="profileEducation" placeholder="학력" autocomplete="off">
+        <input id="profileMajor" placeholder="전공 / 관심 분야" autocomplete="off">
+        <input id="profileEmail" placeholder="이메일" autocomplete="off">
+        <input id="profilePhone" placeholder="연락처" autocomplete="off">
+        <input id="profileTarget" class="full" placeholder="희망 직무 / 지원 분야" autocomplete="off">
+        <textarea id="profileNote" class="full" placeholder="성향, 가치관, 자기소개에 꼭 넣고 싶은 정보"></textarea>
+      </div>
+      </div>
+      <div id="profileSummary" class="profile-summary"></div>
+    </section>
+  </section>
+
+  <section id="tab-portfolio" class="tab-panel" aria-label="포트폴리오">
+  <section class="input-box collapsible collapsed" aria-label="포트폴리오 기록 입력" id="portfolioInputSection">
+    <div class="section-title">
+      <h2>포트폴리오 입력</h2>
+      <button type="button" class="collapse-toggle" onclick="toggleSection('portfolioInputSection')">열기/닫기</button>
+    </div>
+    <div class="collapsible-body">
+    <p class="notice" id="formStatus">새 기록을 추가하는 중입니다.</p>
+    <div class="form-grid">
+      <input id="title" placeholder="제목" autocomplete="off">
+      <select id="category">
+        <option value="영상">영상</option>
+        <option value="대외활동">대외활동</option>
+        <option value="알바">알바</option>
+        <option value="학업">학업</option>
+      </select>
+      <input id="role" placeholder="역할" autocomplete="off">
+      <input id="skills" placeholder="스킬 (쉼표로 구분)" autocomplete="off">
+      <input id="dateStart" type="date" aria-label="시작 날짜">
+      <input id="dateEnd" type="date" aria-label="종료 날짜">
+      <textarea id="desc" class="full" placeholder="설명"></textarea>
+      <input id="result" class="full" placeholder="성과" autocomplete="off">
+      <input id="link" class="full" placeholder="링크 (선택)" autocomplete="off">
+    </div>
+    <div class="toolbar" style="margin:12px 0 0">
+      <button type="button" id="saveButton" onclick="add()">추가</button>
+      <button type="button" class="dark" onclick="resetForm()">취소</button>
+    </div>
     </div>
   </section>
 
-  <footer class="controls">
-    <button type="button" onclick="prevSlide()">이전</button>
-    <span class="counter" id="counter">0 / 0</span>
-    <button type="button" onclick="nextSlide()">다음</button>
-  </footer>
+  <section class="input-box collapsible collapsed" aria-label="검색 및 필터" id="portfolioFilterSection">
+    <div class="section-title">
+      <h2>검색 / 필터</h2>
+      <button type="button" class="collapse-toggle" onclick="toggleSection('portfolioFilterSection')">열기/닫기</button>
+    </div>
+  <section class="toolbar collapsible-body">
+    <input id="search" placeholder="검색" oninput="render()">
+    <select id="filter" onchange="render()">
+      <option value="all">전체</option>
+      <option value="영상">영상</option>
+      <option value="대외활동">대외활동</option>
+      <option value="알바">알바</option>
+      <option value="학업">학업</option>
+      <option value="important">중요만</option>
+    </select>
+    <select id="qualityFilter" onchange="render()">
+      <option value="all">완성도 전체</option>
+      <option value="complete">완성 기록</option>
+      <option value="needs">보완 필요</option>
+      <option value="numbers">성과 수치 있음</option>
+    </select>
+    <input id="tagFilter" placeholder="스킬/역량 태그 필터" oninput="render()">
+    <button type="button" onclick="showPortfolio()">포트폴리오 보기</button>
+    <button type="button" class="dark" onclick="analyzePortfolio()">AI 분석</button>
+  </section>
+  </section>
+
+  <section class="analysis-box collapsible collapsed" aria-label="AI 포트폴리오 분석" id="portfolioAnalysisSection">
+    <div class="analysis-head">
+      <h2>AI 포트폴리오 분석</h2>
+      <div class="toolbar" style="margin:0">
+        <button type="button" class="collapse-toggle" onclick="toggleSection('portfolioAnalysisSection')">열기/닫기</button>
+        <button type="button" onclick="analyzePortfolio()">다시 분석</button>
+      </div>
+    </div>
+    <div class="collapsible-body">
+      <div id="analysisResult" class="empty">기록을 추가한 뒤 AI 분석을 눌러 직무와 자기소개 키워드를 추천받아 보세요.</div>
+    </div>
+  </section>
+
+  <section class="visual-box collapsible collapsed" aria-label="포트폴리오 시각화" id="portfolioVisualSection">
+    <div class="visual-head">
+      <h2>포트폴리오 시각화</h2>
+      <div class="toolbar" style="margin:0">
+        <button type="button" class="collapse-toggle" onclick="toggleSection('portfolioVisualSection')">열기/닫기</button>
+        <button type="button" onclick="renderVisuals()">새로고침</button>
+      </div>
+    </div>
+    <div class="collapsible-body">
+      <div id="visualResult" class="empty">기록을 추가하면 카테고리, 스킬, 활동 기간이 차트로 표시됩니다.</div>
+    </div>
+  </section>
+
+  <section class="list" id="list" aria-live="polite"></section>
+
+  <section class="export-box" aria-label="데이터 백업">
+    <button type="button" onclick="exportData()">데이터 다운로드(JSON)</button>
+    <input id="importFile" type="file" accept="application/json,.json" onchange="importData(event)">
+  </section>
+  </section>
+
+  <section id="tab-experience" class="tab-panel" aria-label="자유경험">
+    <section class="input-box collapsible collapsed" id="experienceInputSection">
+      <div class="section-title">
+        <h2>자유경험 입력</h2>
+        <button type="button" class="collapse-toggle" onclick="toggleSection('experienceInputSection')">열기/닫기</button>
+      </div>
+      <div class="collapsible-body">
+      <p class="notice" id="experienceStatus">새 자유경험을 추가하는 중입니다.</p>
+      <div class="form-grid">
+        <input id="experienceTitle" placeholder="경험 제목" autocomplete="off">
+        <select id="experienceType">
+          <option value="성장">성장</option>
+          <option value="갈등 해결">갈등 해결</option>
+          <option value="협업">협업</option>
+          <option value="도전">도전</option>
+          <option value="실패와 개선">실패와 개선</option>
+          <option value="가치관">가치관</option>
+        </select>
+        <input id="experienceDate" type="date" aria-label="경험 날짜">
+        <input id="experienceKeywords" placeholder="키워드 (쉼표로 구분)" autocomplete="off">
+        <textarea id="experienceSituation" class="full" placeholder="상황 / 배경"></textarea>
+        <textarea id="experienceAction" class="full" placeholder="내가 한 행동"></textarea>
+        <textarea id="experienceResult" class="full" placeholder="결과 / 배운 점"></textarea>
+      </div>
+      <div class="toolbar" style="margin:12px 0 0">
+        <button type="button" id="experienceSaveButton" onclick="addExperience()">추가</button>
+        <button type="button" class="dark" onclick="resetExperienceForm()">취소</button>
+      </div>
+      </div>
+    </section>
+    <section class="experience-list" id="experienceList" aria-live="polite"></section>
+  </section>
+
+  <section id="tab-application" class="tab-panel" aria-label="지원공고">
+    <section class="input-box collapsible collapsed" id="applicationInputSection">
+      <div class="section-title">
+        <h2>지원공고 입력</h2>
+        <button type="button" class="collapse-toggle" onclick="toggleSection('applicationInputSection')">열기/닫기</button>
+      </div>
+      <div class="collapsible-body">
+      <p class="notice" id="applicationStatus">새 지원공고를 추가하는 중입니다.</p>
+      <div class="form-grid">
+        <input id="appDeadline" type="date" aria-label="마감일">
+        <input id="appLink" placeholder="공고 링크" autocomplete="off">
+        <textarea id="appDescription" class="full" placeholder="간략한 설명 (회사명, 직무, 메모 등)"></textarea>
+      </div>
+      <div class="toolbar" style="margin:12px 0 0">
+        <button type="button" id="applicationSaveButton" onclick="addApplication()">추가</button>
+        <button type="button" class="dark" onclick="resetApplicationForm()">취소</button>
+      </div>
+      </div>
+    </section>
+    <section class="application-list" id="applicationList" aria-live="polite"></section>
+  </section>
+
+  <section class="outline-box collapsible collapsed" aria-label="자기소개서 개요 생성" id="coverToolSection">
+    <div class="analysis-head">
+      <h2>맞춤형 자기소개서 도구</h2>
+      <div class="toolbar" style="margin:0">
+        <button type="button" class="collapse-toggle" onclick="toggleSection('coverToolSection')">열기/닫기</button>
+        <button type="button" onclick="generateCoverLetterOutline()">맞춤 개요 생성</button>
+      </div>
+    </div>
+    <div class="collapsible-body">
+    <div class="form-grid">
+      <input id="coverTarget" placeholder="지원 직무 / 회사 / 분야" autocomplete="off">
+      <input id="coverTone" placeholder="원하는 톤 (예: 담백하게, 열정적으로)" autocomplete="off">
+      <textarea id="coverQuestion" class="full" placeholder="자기소개서 문항을 입력하세요. 예: 지원동기와 입사 후 포부를 작성하세요."></textarea>
+    </div>
+    <div class="export-actions">
+      <button type="button" class="dark" onclick="checkCompleteness()">완성도 점검</button>
+      <button type="button" onclick="exportOutlineText()">텍스트 내보내기</button>
+      <button type="button" onclick="printOutlinePdf()">PDF로 저장/인쇄</button>
+      <button type="button" onclick="location.href='slides.html'">PPT 페이지 보기</button>
+    </div>
+    <div class="toolbar" style="margin:12px 0 0">
+      <select id="slideTemplate" onchange="saveSlideTemplate()">
+        <option value="clean">PPT 템플릿: 깔끔한 제출용</option>
+        <option value="media">PPT 템플릿: 영상/콘텐츠용</option>
+        <option value="report">PPT 템플릿: 활동보고서용</option>
+      </select>
+      <span id="backupStatus" class="backup-note"></span>
+    </div>
+    <div id="outlineResult" class="empty">인적사항, 포트폴리오, 자유경험을 바탕으로 자기소개서 개요를 만들어 줍니다.</div>
+    <div id="completenessResult" style="margin-top:12px"></div>
+    </div>
+  </section>
 </main>
 
 <script>
 const STORAGE_KEY = 'portfolio';
 const PROFILE_KEY = 'portfolioProfile';
+const PROFILES_KEY = 'portfolioProfiles';
+const ACTIVE_PROFILE_KEY = 'portfolioActiveProfile';
 const EXPERIENCE_KEY = 'portfolioExperiences';
 const APPLICATION_KEY = 'portfolioApplications';
+const BACKUP_KEY = 'portfolioBackupAt';
 const SLIDE_TEMPLATE_KEY = 'portfolioSlideTemplate';
-let current = 0;
+let editId = null;
+let experienceEditId = null;
+let applicationEditId = null;
+
+const fields = {
+  title: document.getElementById('title'),
+  category: document.getElementById('category'),
+  role: document.getElementById('role'),
+  skills: document.getElementById('skills'),
+  dateStart: document.getElementById('dateStart'),
+  dateEnd: document.getElementById('dateEnd'),
+  desc: document.getElementById('desc'),
+  result: document.getElementById('result'),
+  link: document.getElementById('link')
+};
+
+const profileFields = {
+  name: document.getElementById('profileName'),
+  birth: document.getElementById('profileBirth'),
+  education: document.getElementById('profileEducation'),
+  major: document.getElementById('profileMajor'),
+  email: document.getElementById('profileEmail'),
+  phone: document.getElementById('profilePhone'),
+  target: document.getElementById('profileTarget'),
+  note: document.getElementById('profileNote')
+};
+
+const experienceFields = {
+  title: document.getElementById('experienceTitle'),
+  type: document.getElementById('experienceType'),
+  date: document.getElementById('experienceDate'),
+  keywords: document.getElementById('experienceKeywords'),
+  situation: document.getElementById('experienceSituation'),
+  action: document.getElementById('experienceAction'),
+  result: document.getElementById('experienceResult')
+};
+
+const applicationFields = {
+  deadline: document.getElementById('appDeadline'),
+  link: document.getElementById('appLink'),
+  description: document.getElementById('appDescription')
+};
 
 function readJson(key, fallback){
   try{
@@ -109,6 +418,506 @@ function readJson(key, fallback){
   }
 }
 
+function writeJson(key, value){
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function toggleSection(id, open){
+  const section = document.getElementById(id);
+  if(!section) return;
+  if(section.classList.contains('collapsible-body')){
+    section.style.display = typeof open === 'boolean'
+      ? (open ? '' : 'none')
+      : (section.style.display === 'none' ? '' : 'none');
+    return;
+  }
+  if(typeof open === 'boolean') section.classList.toggle('collapsed', !open);
+  else section.classList.toggle('collapsed');
+}
+
+function makeId(prefix){
+  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
+function getProfiles(){
+  const profiles = readJson(PROFILES_KEY, []);
+  return Array.isArray(profiles) ? profiles : [];
+}
+
+function saveProfiles(profiles){
+  writeJson(PROFILES_KEY, profiles);
+}
+
+function getActiveProfileId(){
+  return localStorage.getItem(ACTIVE_PROFILE_KEY) || '';
+}
+
+function setActiveProfileId(id){
+  localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+}
+
+function ensureProfileSystem(){
+  let profiles = getProfiles();
+  if(!profiles.length){
+    const oldProfile = readJson(PROFILE_KEY, {});
+    const id = makeId('profile');
+    const profile = {
+      id,
+      name: oldProfile.name || '기본 인적사항',
+      birth: oldProfile.birth || '',
+      education: oldProfile.education || '',
+      major: oldProfile.major || '',
+      email: oldProfile.email || '',
+      phone: oldProfile.phone || '',
+      target: oldProfile.target || '',
+      note: oldProfile.note || ''
+    };
+    profiles = [profile];
+    saveProfiles(profiles);
+    setActiveProfileId(id);
+    [STORAGE_KEY, EXPERIENCE_KEY, APPLICATION_KEY].forEach(key=>{
+      const data = readJson(key, []);
+      if(Array.isArray(data)){
+        writeJson(key, data.map(item=>item.profileId ? item : {...item, profileId: id}));
+      }
+    });
+  }
+  if(!getActiveProfileId() || !profiles.some(profile=>profile.id === getActiveProfileId())){
+    setActiveProfileId(profiles[0].id);
+  }
+}
+
+function getActiveProfile(){
+  return getProfiles().find(profile=>profile.id === getActiveProfileId()) || getProfiles()[0] || {};
+}
+
+function renderProfileSelector(){
+  const select = document.getElementById('activeProfile');
+  const activeId = getActiveProfileId();
+  select.replaceChildren();
+  getProfiles().forEach(profile=>{
+    const option = document.createElement('option');
+    option.value = profile.id;
+    option.textContent = profile.name || profile.target || '이름 없는 인적사항';
+    option.selected = profile.id === activeId;
+    select.appendChild(option);
+  });
+}
+
+function setActiveProfile(id){
+  setActiveProfileId(id);
+  resetForm();
+  resetExperienceForm();
+  resetApplicationForm();
+  renderProfile();
+  renderExperiences();
+  renderApplications();
+  render();
+  generateCoverLetterOutline(false);
+}
+
+function newProfile(){
+  const id = makeId('profile');
+  const profile = {id, name:'', birth:'', education:'', major:'', email:'', phone:'', target:'', note:''};
+  saveProfiles([...getProfiles(), profile]);
+  setActiveProfileId(id);
+  renderProfileSelector();
+  renderProfile();
+  switchTab('profile');
+}
+
+function deleteActiveProfile(){
+  const profiles = getProfiles();
+  if(profiles.length <= 1){
+    alert('최소 1개의 인적사항은 필요합니다.');
+    return;
+  }
+  const active = getActiveProfile();
+  if(!confirm(`"${active.name || '이름 없는 인적사항'}"과 연결된 기록을 모두 삭제할까요?`)) return;
+  const nextProfiles = profiles.filter(profile=>profile.id !== active.id);
+  saveProfiles(nextProfiles);
+  [STORAGE_KEY, EXPERIENCE_KEY, APPLICATION_KEY].forEach(key=>{
+    const data = readJson(key, []);
+    if(Array.isArray(data)) writeJson(key, data.filter(item=>item.profileId !== active.id));
+  });
+  setActiveProfileId(nextProfiles[0].id);
+  renderProfileSelector();
+  renderProfile();
+  renderExperiences();
+  renderApplications();
+  render();
+}
+
+function switchTab(tabName){
+  if(tabName !== 'profile' && !getActiveProfile().name){
+    alert('먼저 인적사항의 이름을 저장해 주세요.');
+    tabName = 'profile';
+  }
+  document.querySelectorAll('.tab-button').forEach(button=>{
+    button.classList.toggle('active', button.dataset.tab === tabName);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel=>{
+    panel.classList.toggle('active', panel.id === `tab-${tabName}`);
+  });
+}
+
+function getProfile(){
+  return getActiveProfile();
+}
+
+function getProfileDraft(){
+  const saved = getProfile();
+  const draft = {...saved};
+  Object.entries(profileFields).forEach(([key, field])=>{
+    if(field.value.trim()) draft[key] = field.value.trim();
+  });
+  return draft;
+}
+
+function saveProfileData(data){
+  const activeId = getActiveProfileId();
+  const profiles = getProfiles().map(profile=>profile.id === activeId ? {...profile, ...data, id: activeId} : profile);
+  saveProfiles(profiles);
+  writeJson(PROFILE_KEY, {...data, id: activeId});
+  renderProfileSelector();
+}
+
+function getExperiences(){
+  const data = readJson(EXPERIENCE_KEY, []);
+  return Array.isArray(data) ? data.filter(item=>!item.profileId || item.profileId === getActiveProfileId()) : [];
+}
+
+function saveExperiences(data){
+  const all = readJson(EXPERIENCE_KEY, []);
+  const activeId = getActiveProfileId();
+  const others = Array.isArray(all) ? all.filter(item=>item.profileId && item.profileId !== activeId) : [];
+  writeJson(EXPERIENCE_KEY, [...others, ...data.map(item=>({...item, profileId: activeId}))]);
+}
+
+function getApplications(){
+  const data = readJson(APPLICATION_KEY, []);
+  return Array.isArray(data) ? data.filter(item=>!item.profileId || item.profileId === getActiveProfileId()) : [];
+}
+
+function saveApplications(data){
+  const all = readJson(APPLICATION_KEY, []);
+  const activeId = getActiveProfileId();
+  const others = Array.isArray(all) ? all.filter(item=>item.profileId && item.profileId !== activeId) : [];
+  writeJson(APPLICATION_KEY, [...others, ...data.map(item=>({...item, profileId: activeId}))]);
+}
+
+function getData(){
+  try{
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed.filter(item=>!item.profileId || item.profileId === getActiveProfileId()) : [];
+  }catch{
+    return [];
+  }
+}
+
+function saveData(data){
+  const all = readJson(STORAGE_KEY, []);
+  const activeId = getActiveProfileId();
+  const others = Array.isArray(all) ? all.filter(item=>item.profileId && item.profileId !== activeId) : [];
+  writeJson(STORAGE_KEY, [...others, ...data.map(item=>({...item, profileId: activeId}))]);
+}
+
+function saveProfile(){
+  const profile = {};
+  Object.entries(profileFields).forEach(([key, field])=>{
+    profile[key] = field.value.trim();
+  });
+  if(!profile.name){
+    alert('이름을 입력해 주세요.');
+    profileFields.name.focus();
+    return;
+  }
+  saveProfileData(profile);
+  renderProfile();
+  switchTab('portfolio');
+  generateCoverLetterOutline(false);
+}
+
+function renderProfile(){
+  const profile = getProfile();
+  Object.entries(profileFields).forEach(([key, field])=>{
+    field.value = profile[key] || '';
+  });
+
+  const summary = document.getElementById('profileSummary');
+  summary.replaceChildren();
+  const items = [
+    ['이름', profile.name],
+    ['생년월일', profile.birth],
+    ['학력', profile.education],
+    ['전공 / 관심 분야', profile.major],
+    ['희망 직무', profile.target],
+    ['메모', profile.note]
+  ].filter(([,value])=>value);
+
+  if(!items.length){
+    appendText(summary, 'div', '저장된 인적사항이 없습니다.', 'empty');
+    return;
+  }
+
+  items.forEach(([label, value])=>{
+    const item = document.createElement('div');
+    item.className = 'profile-item';
+    appendText(item, 'strong', label);
+    appendText(item, 'span', value);
+    summary.appendChild(item);
+  });
+}
+
+function normalizeUrl(url){
+  const trimmed = url.trim();
+  if(!trimmed) return '';
+  if(/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
+function getFormItem(previous){
+  return {
+    id: editId || Date.now(),
+    title: fields.title.value.trim(),
+    category: fields.category.value,
+    role: fields.role.value.trim(),
+    skills: fields.skills.value.split(',').map(s=>s.trim()).filter(Boolean),
+    dateStart: fields.dateStart.value.trim(),
+    dateEnd: fields.dateEnd.value.trim(),
+    desc: fields.desc.value.trim(),
+    result: fields.result.value.trim(),
+    link: normalizeUrl(fields.link.value),
+    profileId: previous ? previous.profileId || getActiveProfileId() : getActiveProfileId(),
+    important: previous ? Boolean(previous.important) : false
+  };
+}
+
+function add(){
+  const data = getData();
+  const previous = editId ? data.find(v=>v.id === editId) : null;
+  const item = getFormItem(previous);
+
+  if(!item.title){
+    alert('제목을 입력해 주세요.');
+    fields.title.focus();
+    return;
+  }
+  if(!getActiveProfileId()){
+    alert('먼저 인적사항을 저장해 주세요.');
+    switchTab('profile');
+    return;
+  }
+
+  const nextData = editId
+    ? data.map(v=>v.id === editId ? item : v)
+    : [...data, item];
+
+  saveData(nextData);
+  resetForm();
+  toggleSection('portfolioInputSection', false);
+  render();
+}
+
+function resetForm(){
+  Object.values(fields).forEach(field=>{
+    if(field.tagName === 'SELECT') field.selectedIndex = 0;
+    else field.value = '';
+  });
+  editId = null;
+  document.getElementById('saveButton').textContent = '추가';
+  document.getElementById('formStatus').textContent = '새 기록을 추가하는 중입니다.';
+}
+
+function editItem(id){
+  const v = getData().find(x=>x.id === id);
+  if(!v) return;
+  fields.title.value = v.title || '';
+  fields.category.value = v.category || '영상';
+  fields.role.value = v.role || '';
+  fields.skills.value = Array.isArray(v.skills) ? v.skills.join(', ') : '';
+  fields.dateStart.value = v.dateStart || '';
+  fields.dateEnd.value = v.dateEnd || '';
+  fields.desc.value = v.desc || '';
+  fields.result.value = v.result || '';
+  fields.link.value = v.link || '';
+  editId = id;
+  document.getElementById('saveButton').textContent = '수정 저장';
+  document.getElementById('formStatus').textContent = `"${v.title}" 기록을 수정하는 중입니다.`;
+  toggleSection('portfolioInputSection', true);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleStar(id){
+  const data = getData().map(v=>v.id === id ? {...v, important: !v.important} : v);
+  saveData(data);
+  render();
+}
+
+function remove(id){
+  const item = getData().find(v=>v.id === id);
+  if(!item || !confirm(`"${item.title}" 기록을 삭제할까요?`)) return;
+  saveData(getData().filter(v=>v.id !== id));
+  if(editId === id) resetForm();
+  render();
+}
+
+function getExperienceFormItem(previous){
+  return {
+    id: experienceEditId || Date.now(),
+    title: experienceFields.title.value.trim(),
+    type: experienceFields.type.value,
+    date: experienceFields.date.value.trim(),
+    keywords: experienceFields.keywords.value.split(',').map(v=>v.trim()).filter(Boolean),
+    situation: experienceFields.situation.value.trim(),
+    action: experienceFields.action.value.trim(),
+    result: experienceFields.result.value.trim(),
+    profileId: previous ? previous.profileId || getActiveProfileId() : getActiveProfileId(),
+    important: previous ? Boolean(previous.important) : false
+  };
+}
+
+function addExperience(){
+  const data = getExperiences();
+  const previous = experienceEditId ? data.find(v=>v.id === experienceEditId) : null;
+  const item = getExperienceFormItem(previous);
+
+  if(!item.title){
+    alert('경험 제목을 입력해 주세요.');
+    experienceFields.title.focus();
+    return;
+  }
+
+  const nextData = experienceEditId
+    ? data.map(v=>v.id === experienceEditId ? item : v)
+    : [...data, item];
+
+  saveExperiences(nextData);
+  resetExperienceForm();
+  toggleSection('experienceInputSection', false);
+  renderExperiences();
+  generateCoverLetterOutline(false);
+}
+
+function resetExperienceForm(){
+  Object.values(experienceFields).forEach(field=>{
+    if(field.tagName === 'SELECT') field.selectedIndex = 0;
+    else field.value = '';
+  });
+  experienceEditId = null;
+  document.getElementById('experienceSaveButton').textContent = '추가';
+  document.getElementById('experienceStatus').textContent = '새 자유경험을 추가하는 중입니다.';
+}
+
+function editExperience(id){
+  const item = getExperiences().find(v=>v.id === id);
+  if(!item) return;
+  experienceFields.title.value = item.title || '';
+  experienceFields.type.value = item.type || '성장';
+  experienceFields.date.value = item.date || '';
+  experienceFields.keywords.value = Array.isArray(item.keywords) ? item.keywords.join(', ') : '';
+  experienceFields.situation.value = item.situation || '';
+  experienceFields.action.value = item.action || '';
+  experienceFields.result.value = item.result || '';
+  experienceEditId = id;
+  document.getElementById('experienceSaveButton').textContent = '수정 저장';
+  document.getElementById('experienceStatus').textContent = `"${item.title}" 경험을 수정하는 중입니다.`;
+  switchTab('experience');
+  toggleSection('experienceInputSection', true);
+}
+
+function removeExperience(id){
+  const item = getExperiences().find(v=>v.id === id);
+  if(!item || !confirm(`"${item.title}" 경험을 삭제할까요?`)) return;
+  saveExperiences(getExperiences().filter(v=>v.id !== id));
+  if(experienceEditId === id) resetExperienceForm();
+  renderExperiences();
+  generateCoverLetterOutline(false);
+}
+
+function toggleExperienceStar(id){
+  const data = getExperiences().map(v=>v.id === id ? {...v, important: !v.important} : v);
+  saveExperiences(data);
+  renderExperiences();
+  generateCoverLetterOutline(false);
+}
+
+function getApplicationFormItem(){
+  return {
+    id: applicationEditId || Date.now(),
+    deadline: applicationFields.deadline.value.trim(),
+    link: normalizeUrl(applicationFields.link.value),
+    description: applicationFields.description.value.trim(),
+    profileId: getActiveProfileId()
+  };
+}
+
+function addApplication(){
+  const data = getApplications();
+  const item = getApplicationFormItem();
+  if(!item.link && !item.description){
+    alert('공고 링크나 간략한 설명을 입력해 주세요.');
+    applicationFields.link.focus();
+    return;
+  }
+  const nextData = applicationEditId
+    ? data.map(v=>v.id === applicationEditId ? item : v)
+    : [...data, item];
+  saveApplications(nextData);
+  resetApplicationForm();
+  toggleSection('applicationInputSection', false);
+  renderApplications();
+  checkCompleteness();
+}
+
+function resetApplicationForm(){
+  Object.values(applicationFields).forEach(field=>{
+    if(field.tagName === 'SELECT') field.selectedIndex = 0;
+    else field.value = '';
+  });
+  applicationEditId = null;
+  document.getElementById('applicationSaveButton').textContent = '추가';
+  document.getElementById('applicationStatus').textContent = '새 지원공고를 추가하는 중입니다.';
+}
+
+function editApplication(id){
+  const item = getApplications().find(v=>v.id === id);
+  if(!item) return;
+  applicationFields.deadline.value = item.deadline || '';
+  applicationFields.link.value = item.link || '';
+  applicationFields.description.value = item.description || item.question || `${item.company || ''} ${item.role || ''}`.trim();
+  applicationEditId = id;
+  document.getElementById('applicationSaveButton').textContent = '수정 저장';
+  document.getElementById('applicationStatus').textContent = '지원공고를 수정하는 중입니다.';
+  switchTab('application');
+  toggleSection('applicationInputSection', true);
+}
+
+function removeApplication(id){
+  const item = getApplications().find(v=>v.id === id);
+  if(!item || !confirm('이 지원공고를 삭제할까요?')) return;
+  saveApplications(getApplications().filter(v=>v.id !== id));
+  if(applicationEditId === id) resetApplicationForm();
+  renderApplications();
+  checkCompleteness();
+}
+
+function useApplication(id){
+  const item = getApplications().find(v=>v.id === id);
+  if(!item) return;
+  document.getElementById('coverTarget').value = item.description || '';
+  document.getElementById('coverQuestion').value = item.description || '';
+  switchTab('application');
+  generateCoverLetterOutline();
+}
+
+function useApplicationForOutline(){
+  const item = getApplicationFormItem();
+  document.getElementById('coverTarget').value = item.description || '';
+  document.getElementById('coverQuestion').value = item.description || '';
+  generateCoverLetterOutline();
+}
+
 function appendText(parent, tag, text, className){
   const el = document.createElement(tag);
   if(className) el.className = className;
@@ -117,198 +926,971 @@ function appendText(parent, tag, text, className){
   return el;
 }
 
-function createSlide(className = ''){
-  const slide = document.createElement('section');
-  slide.className = `slide ${className}`.trim();
-  return slide;
+function getPortfolioBadges(v){
+  const badges = [];
+  if(v.title && v.role && Array.isArray(v.skills) && v.skills.length && v.desc && v.result) badges.push(['완성', 'badge-ok']);
+  else badges.push(['보완 필요', 'badge-warn']);
+  if(!v.result) badges.push(['성과 없음', 'badge-miss']);
+  else if(/\d|%|명|회|개|원|시간|개월|년/.test(v.result)) badges.push(['수치 성과', 'badge-ok']);
+  if(!Array.isArray(v.skills) || !v.skills.length) badges.push(['스킬 없음', 'badge-miss']);
+  return badges;
 }
 
-function countSkills(portfolio){
-  const counts = new Map();
-  portfolio.forEach(item=>{
-    (Array.isArray(item.skills) ? item.skills : []).forEach(skill=>{
-      if(skill) counts.set(skill, (counts.get(skill) || 0) + 1);
-    });
-  });
-  return [...counts.entries()].sort((a,b)=>b[1] - a[1]).slice(0, 8).map(([skill])=>skill);
+function getExperienceBadges(v){
+  const badges = [];
+  if(v.situation && v.action && v.result) badges.push(['STAR 완성', 'badge-ok']);
+  else badges.push(['STAR 보완', 'badge-warn']);
+  if(!Array.isArray(v.keywords) || !v.keywords.length) badges.push(['키워드 없음', 'badge-miss']);
+  return badges;
 }
 
-function getStrengths(portfolio, experiences){
-  const text = [
-    ...portfolio.map(v=>[v.title,v.role,v.desc,v.result,(v.skills || []).join(' ')].join(' ')),
-    ...experiences.map(v=>[v.title,v.type,v.situation,v.action,v.result,(v.keywords || []).join(' ')].join(' '))
-  ].join(' ');
-  const rules = [
-    ['기획력',['기획','구성','아이디어','콘텐츠']],
-    ['실행력',['제작','진행','운영','완성','실행']],
-    ['협업력',['협업','팀','소통','조율','갈등']],
-    ['문제 해결력',['문제','해결','개선','피드백','보완']],
-    ['분석력',['분석','성과','결과','데이터','조회수']],
-    ['책임감',['책임','마감','관리','꾸준','담당']]
-  ];
-  return rules
-    .map(([name, words])=>({name, score: words.reduce((sum, word)=>sum + (text.includes(word) ? 1 : 0), 0)}))
-    .filter(v=>v.score > 0)
-    .sort((a,b)=>b.score - a.score)
-    .slice(0, 5)
-    .map(v=>v.name);
+function appendBadges(parent, badges){
+  const wrap = document.createElement('div');
+  wrap.className = 'tags';
+  badges.forEach(([label, className])=>appendText(wrap, 'span', label, `badge ${className}`));
+  parent.appendChild(wrap);
 }
 
-function addTags(parent, words){
+function createCard(v, withActions = true){
+  const el = document.createElement('article');
+  el.className = 'card';
+
+  if(withActions){
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    actions.innerHTML = `
+      <button type="button" class="star" aria-label="중요 표시">${v.important ? '★' : '☆'}</button>
+      <button type="button" class="edit">수정</button>
+      <button type="button" class="delete">삭제</button>
+    `;
+    actions.querySelector('.star').onclick = ()=>toggleStar(v.id);
+    actions.querySelector('.edit').onclick = ()=>editItem(v.id);
+    actions.querySelector('.delete').onclick = ()=>remove(v.id);
+    el.appendChild(actions);
+  }
+
+  appendText(el, 'h3', v.title || '제목 없음');
+  appendText(el, 'div', `${v.category || '분류 없음'} | ${v.dateStart || '-'} ~ ${v.dateEnd || '-'}`, 'meta');
+  appendBadges(el, getPortfolioBadges(v));
+
   const tags = document.createElement('div');
   tags.className = 'tags';
-  words.filter(Boolean).forEach(word=>appendText(tags, 'span', word, 'tag'));
-  parent.appendChild(tags);
+  (Array.isArray(v.skills) ? v.skills : []).forEach(skill=>appendText(tags, 'span', skill, 'tag'));
+  el.appendChild(tags);
+
+  if(v.desc) appendText(el, 'div', v.desc, 'detail');
+  if(v.role) appendText(el, 'div', `역할: ${v.role}`, 'meta');
+  if(v.result) appendText(el, 'div', `성과: ${v.result}`, 'meta');
+  if(v.link){
+    const link = appendText(el, 'a', '링크 보기', 'link');
+    link.href = v.link;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+  return el;
 }
 
-function buildSlides(){
-  const template = readJson(SLIDE_TEMPLATE_KEY, 'clean');
-  document.body.classList.add(`template-${template}`);
-  const profile = readJson(PROFILE_KEY, {});
-  const portfolio = readJson(STORAGE_KEY, []);
-  const experiences = readJson(EXPERIENCE_KEY, []);
-  const applications = readJson(APPLICATION_KEY, []);
-  const importantPortfolio = portfolio.filter(v=>v.important).concat(portfolio.filter(v=>!v.important)).slice(0, 5);
-  const importantExperiences = experiences.filter(v=>v.important).concat(experiences.filter(v=>!v.important)).slice(0, 3);
-  const deck = document.getElementById('deck');
-  deck.replaceChildren();
+function createExperienceCard(v){
+  const el = document.createElement('article');
+  el.className = 'card';
 
-  if(!Object.values(profile).some(Boolean) && !portfolio.length && !experiences.length){
-    document.getElementById('empty').hidden = false;
-    return [];
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  actions.innerHTML = `
+    <button type="button" class="star" aria-label="중요 표시">${v.important ? '★' : '☆'}</button>
+    <button type="button" class="edit">수정</button>
+    <button type="button" class="delete">삭제</button>
+  `;
+  actions.querySelector('.star').onclick = ()=>toggleExperienceStar(v.id);
+  actions.querySelector('.edit').onclick = ()=>editExperience(v.id);
+  actions.querySelector('.delete').onclick = ()=>removeExperience(v.id);
+  el.appendChild(actions);
+
+  appendText(el, 'h3', v.title || '제목 없음');
+  appendText(el, 'div', `${v.type || '경험'} | ${v.date || '-'}`, 'meta');
+  appendBadges(el, getExperienceBadges(v));
+
+  const tags = document.createElement('div');
+  tags.className = 'tags';
+  (Array.isArray(v.keywords) ? v.keywords : []).forEach(keyword=>appendText(tags, 'span', keyword, 'tag'));
+  el.appendChild(tags);
+
+  if(v.situation) appendText(el, 'div', `상황: ${v.situation}`, 'detail');
+  if(v.action) appendText(el, 'div', `행동: ${v.action}`, 'detail');
+  if(v.result) appendText(el, 'div', `결과/배운 점: ${v.result}`, 'detail');
+  return el;
+}
+
+function renderExperiences(){
+  const container = document.getElementById('experienceList');
+  const data = getExperiences().slice().reverse();
+  container.replaceChildren();
+
+  if(!data.length){
+    appendText(container, 'div', '아직 자유경험 기록이 없습니다.', 'empty');
+    return;
   }
 
-  const slides = [];
-  const cover = createSlide();
-  appendText(cover, 'h2', profile.name || 'My Portfolio', 'slide-title');
-  appendText(cover, 'p', profile.target || '지원 직무와 연결되는 경험 포트폴리오', 'subtitle');
-  appendText(cover, 'p', profile.note || '기록된 경험을 바탕으로 강점과 성장 방향을 정리했습니다.', 'footer-note');
-  slides.push(cover);
+  data.forEach(item=>container.appendChild(createExperienceCard(item)));
+}
 
-  const profileSlide = createSlide();
-  appendText(profileSlide, 'h2', 'Profile', 'slide-title');
-  const profileGrid = document.createElement('div');
-  profileGrid.className = 'grid';
-  [
-    ['학력', profile.education || '-'],
-    ['전공 / 관심 분야', profile.major || '-'],
-    ['희망 직무', profile.target || '-'],
-    ['연락처', [profile.email, profile.phone].filter(Boolean).join(' / ') || '-']
-  ].forEach(([label, value])=>{
-    const panel = document.createElement('div');
-    panel.className = 'panel';
-    appendText(panel, 'h2', label);
-    appendText(panel, 'div', value, 'meta');
-    profileGrid.appendChild(panel);
+function createApplicationCard(v){
+  const el = document.createElement('article');
+  el.className = 'card';
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  actions.innerHTML = `
+    <button type="button" class="star">개요</button>
+    <button type="button" class="edit">수정</button>
+    <button type="button" class="delete">삭제</button>
+  `;
+  actions.querySelector('.star').onclick = ()=>useApplication(v.id);
+  actions.querySelector('.edit').onclick = ()=>editApplication(v.id);
+  actions.querySelector('.delete').onclick = ()=>removeApplication(v.id);
+  el.appendChild(actions);
+
+  appendText(el, 'h3', v.description || v.link || '지원공고');
+  appendText(el, 'div', `마감일: ${v.deadline || '-'}`, 'meta');
+  if(v.link){
+    const link = appendText(el, 'a', '공고 링크 보기', 'link');
+    link.href = v.link;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+  return el;
+}
+
+function renderApplications(){
+  const container = document.getElementById('applicationList');
+  const data = getApplications().slice().sort((a,b)=>(a.deadline || '9999').localeCompare(b.deadline || '9999'));
+  container.replaceChildren();
+  if(!data.length){
+    appendText(container, 'div', '아직 저장된 지원공고가 없습니다.', 'empty');
+    return;
+  }
+  data.forEach(item=>container.appendChild(createApplicationCard(item)));
+}
+
+function getFilteredData(){
+  const keyword = document.getElementById('search').value.trim().toLowerCase();
+  const filterVal = document.getElementById('filter').value;
+  const qualityVal = document.getElementById('qualityFilter').value;
+  const tagVal = document.getElementById('tagFilter').value.trim().toLowerCase();
+  return getData().filter(v=>{
+    const haystack = [v.title, v.desc, v.role, v.result, ...(Array.isArray(v.skills) ? v.skills : [])]
+      .join(' ')
+      .toLowerCase();
+    const matchKeyword = !keyword || haystack.includes(keyword);
+    const matchTag = !tagVal || haystack.includes(tagVal);
+    const matchFilter = filterVal === 'all'
+      ? true
+      : filterVal === 'important'
+        ? v.important
+        : v.category === filterVal;
+    const complete = Boolean(v.title && v.role && Array.isArray(v.skills) && v.skills.length && v.desc && v.result);
+    const hasNumbers = /\d|%|명|회|개|원|시간|개월|년/.test(v.result || '');
+    const matchQuality = qualityVal === 'all'
+      ? true
+      : qualityVal === 'complete'
+        ? complete
+        : qualityVal === 'numbers'
+          ? hasNumbers
+          : !complete;
+    return matchKeyword && matchFilter && matchTag && matchQuality;
   });
-  profileSlide.appendChild(profileGrid);
-  slides.push(profileSlide);
+}
 
-  const summary = createSlide();
-  appendText(summary, 'h2', 'Strength Snapshot', 'slide-title');
-  const strengths = getStrengths(portfolio, experiences);
-  addTags(summary, strengths.length ? strengths : ['성장 가능성','책임감','실행력']);
-  const kpi = document.createElement('div');
-  kpi.className = 'kpi';
-  [
-    [portfolio.length, '포트폴리오 기록'],
-    [experiences.length, '자유경험 기록'],
-    [countSkills(portfolio).length, '스킬 키워드']
-  ].forEach(([value, label])=>{
+function render(){
+  const container = document.getElementById('list');
+  const filtered = getFilteredData().slice().reverse();
+  container.replaceChildren();
+
+  if(!filtered.length){
+    appendText(container, 'div', '표시할 기록이 없습니다.', 'empty');
+    renderVisuals();
+    generateCoverLetterOutline(false);
+    return;
+  }
+
+  filtered.forEach(v=>container.appendChild(createCard(v)));
+  renderVisuals();
+  generateCoverLetterOutline(false);
+}
+
+function showPortfolio(){
+  const container = document.getElementById('list');
+  const important = getData().filter(v=>v.important);
+  container.replaceChildren();
+
+  if(!important.length){
+    appendText(container, 'div', '중요 표시된 기록이 없습니다.', 'empty');
+    return;
+  }
+
+  important.forEach(v=>container.appendChild(createCard(v, false)));
+}
+
+function countValues(values){
+  const counts = new Map();
+  values.filter(Boolean).forEach(value=>{
+    counts.set(value, (counts.get(value) || 0) + 1);
+  });
+  return [...counts.entries()].sort((a,b)=>b[1] - a[1]);
+}
+
+function getMonthKey(dateText){
+  if(!dateText) return '';
+  return dateText.slice(0, 7);
+}
+
+function getDateValue(dateText){
+  const time = new Date(dateText || '').getTime();
+  return Number.isFinite(time) ? time : null;
+}
+
+function appendBarChart(parent, entries){
+  const list = document.createElement('div');
+  list.className = 'bar-list';
+  const max = Math.max(...entries.map(([,count])=>count), 1);
+
+  entries.forEach(([label, count])=>{
+    const row = document.createElement('div');
+    const labelRow = document.createElement('div');
+    labelRow.className = 'bar-label';
+    appendText(labelRow, 'span', label);
+    appendText(labelRow, 'strong', `${count}개`);
+
+    const track = document.createElement('div');
+    track.className = 'bar-track';
+    const fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    fill.style.width = `${Math.max(8, Math.round((count / max) * 100))}%`;
+    track.appendChild(fill);
+
+    row.append(labelRow, track);
+    list.appendChild(row);
+  });
+
+  parent.appendChild(list);
+}
+
+function appendSkillCloud(parent, entries){
+  const cloud = document.createElement('div');
+  cloud.className = 'skill-cloud';
+  const max = Math.max(...entries.map(([,count])=>count), 1);
+
+  entries.forEach(([skill, count])=>{
+    const bubble = appendText(cloud, 'span', skill, 'skill-bubble');
+    const size = 13 + Math.round((count / max) * 10);
+    bubble.style.fontSize = `${size}px`;
+    bubble.title = `${count}회`;
+  });
+
+  parent.appendChild(cloud);
+}
+
+function appendTimeline(parent, items){
+  const validItems = items
+    .map(v=>{
+      const start = getDateValue(v.dateStart);
+      const rawEnd = getDateValue(v.dateEnd) || start;
+      const end = rawEnd && start ? Math.max(start, rawEnd) : start;
+      return start ? {...v, start, end} : null;
+    })
+    .filter(Boolean)
+    .sort((a,b)=>a.start - b.start);
+
+  if(!validItems.length){
+    appendText(parent, 'div', '날짜가 입력된 기록이 있으면 타임라인이 표시됩니다.', 'meta');
+    return;
+  }
+
+  const min = Math.min(...validItems.map(v=>v.start));
+  const max = Math.max(...validItems.map(v=>v.end));
+  const range = Math.max(max - min, 1);
+  const timeline = document.createElement('div');
+  timeline.className = 'timeline';
+
+  validItems.slice(-7).forEach(v=>{
     const item = document.createElement('div');
-    appendText(item, 'strong', String(value));
-    appendText(item, 'span', label);
-    kpi.appendChild(item);
-  });
-  summary.appendChild(kpi);
-  slides.push(summary);
+    item.className = 'timeline-item';
+    appendText(item, 'div', v.title || '제목 없음', 'timeline-title');
 
-  if(applications.length){
-    const appSlide = createSlide();
-    appendText(appSlide, 'h2', 'Application Tracker', 'slide-title');
-    const list = document.createElement('div');
-    list.className = 'big-list';
-    applications.slice(0, 4).forEach(item=>{
-      const row = document.createElement('div');
-      row.className = 'item';
-      appendText(row, 'h2', `${item.company || '회사'} - ${item.role || '직무'}`);
-      appendText(row, 'div', `상태: ${item.status || '관심'} | 마감일: ${item.deadline || '-'}`, 'meta');
-      if(item.question) appendText(row, 'div', item.question, 'meta');
-      list.appendChild(row);
-    });
-    appSlide.appendChild(list);
-    slides.push(appSlide);
+    const track = document.createElement('div');
+    track.className = 'timeline-track';
+    track.title = `${getMonthKey(v.dateStart) || '-'} ~ ${getMonthKey(v.dateEnd) || getMonthKey(v.dateStart) || '-'}`;
+
+    const fill = document.createElement('div');
+    fill.className = 'timeline-fill';
+    fill.style.left = `${Math.round(((v.start - min) / range) * 100)}%`;
+    fill.style.width = `${Math.max(8, Math.round(((v.end - v.start) / range) * 100))}%`;
+    track.appendChild(fill);
+
+    item.appendChild(track);
+    timeline.appendChild(item);
+  });
+
+  parent.appendChild(timeline);
+}
+
+function renderVisuals(){
+  const data = getData();
+  const result = document.getElementById('visualResult');
+  result.className = '';
+  result.replaceChildren();
+
+  if(!data.length){
+    result.className = 'empty';
+    result.textContent = '기록을 추가하면 카테고리, 스킬, 활동 기간이 차트로 표시됩니다.';
+    return;
   }
 
-  importantPortfolio.forEach(item=>{
-    const slide = createSlide();
-    appendText(slide, 'h2', item.title || 'Portfolio', 'slide-title');
-    appendText(slide, 'p', `${item.category || '분류 없음'} | ${item.dateStart || '-'} ~ ${item.dateEnd || '-'}`, 'subtitle');
-    const body = document.createElement('div');
-    body.className = 'portfolio-body';
-    const left = document.createElement('div');
-    appendText(left, 'p', item.desc || '설명이 없습니다.');
-    if(item.result) appendText(left, 'div', `성과: ${item.result}`, 'result');
-    const right = document.createElement('div');
-    right.className = 'panel';
-    appendText(right, 'h2', 'Role & Skills');
-    appendText(right, 'div', item.role || '역할 미입력', 'meta');
-    addTags(right, item.skills || []);
-    body.append(left, right);
-    slide.appendChild(body);
-    slides.push(slide);
+  const categoryCounts = countValues(data.map(v=>v.category));
+  const skillCounts = countValues(data.flatMap(v=>Array.isArray(v.skills) ? v.skills : [])).slice(0, 12);
+  const importantCount = data.filter(v=>v.important).length;
+  const datedCount = data.filter(v=>v.dateStart || v.dateEnd).length;
+
+  const stats = document.createElement('div');
+  stats.className = 'stat-row';
+  [
+    ['전체 기록', data.length],
+    ['중요 기록', importantCount],
+    ['날짜 기록', datedCount]
+  ].forEach(([label, value])=>{
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    appendText(card, 'span', String(value), 'stat-value');
+    appendText(card, 'span', label, 'stat-label');
+    stats.appendChild(card);
   });
 
-  importantExperiences.forEach(item=>{
-    const slide = createSlide();
-    appendText(slide, 'h2', item.title || 'Experience', 'slide-title');
-    appendText(slide, 'p', `${item.type || '경험'} | ${item.date || '-'}`, 'subtitle');
-    addTags(slide, item.keywords || []);
-    const steps = document.createElement('div');
-    steps.className = 'experience-steps';
-    [
-      ['상황', item.situation || '-'],
-      ['행동', item.action || '-'],
-      ['결과/배운 점', item.result || '-']
-    ].forEach(([label, value])=>{
-      const step = document.createElement('div');
-      step.className = 'step';
-      appendText(step, 'strong', label);
-      appendText(step, 'div', value, 'meta');
-      steps.appendChild(step);
+  const grid = document.createElement('div');
+  grid.className = 'visual-grid';
+
+  const categoryPanel = document.createElement('div');
+  categoryPanel.className = 'visual-panel';
+  appendText(categoryPanel, 'h3', '카테고리 분포');
+  appendBarChart(categoryPanel, categoryCounts);
+
+  const skillPanel = document.createElement('div');
+  skillPanel.className = 'visual-panel';
+  appendText(skillPanel, 'h3', '스킬 키워드');
+  if(skillCounts.length) appendSkillCloud(skillPanel, skillCounts);
+  else appendText(skillPanel, 'div', '스킬을 입력하면 키워드가 표시됩니다.', 'meta');
+
+  const timelinePanel = document.createElement('div');
+  timelinePanel.className = 'visual-panel';
+  appendText(timelinePanel, 'h3', '활동 타임라인');
+  appendTimeline(timelinePanel, data);
+
+  grid.append(categoryPanel, skillPanel, timelinePanel);
+  result.append(stats, grid);
+}
+
+function countMatches(text, words){
+  return words.reduce((score, word)=>{
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const matches = text.match(new RegExp(escaped, 'gi'));
+    return score + (matches ? matches.length : 0);
+  }, 0);
+}
+
+function getPortfolioText(data){
+  return data.map(v=>[
+    v.title,
+    v.category,
+    v.role,
+    Array.isArray(v.skills) ? v.skills.join(' ') : '',
+    v.desc,
+    v.result
+  ].join(' ')).join(' ').toLowerCase();
+}
+
+function analyzeJobs(data){
+  const text = getPortfolioText(data);
+  const jobRules = [
+    {
+      name: '콘텐츠 기획자',
+      reason: '기획, 주제 선정, 메시지 구성 경험을 직무 강점으로 연결하기 좋습니다.',
+      words: ['기획','콘텐츠','아이디어','구성','스토리','시나리오','대본','캠페인','브랜딩','타깃','SNS','인스타','유튜브']
+    },
+    {
+      name: '영상 편집자 / PD',
+      reason: '촬영과 편집 결과물이 많다면 제작 역량을 직접 보여주기 좋습니다.',
+      words: ['영상','촬영','편집','프리미어','프리미어프로','애프터이펙트','after effects','컷편집','색보정','썸네일','유튜브','릴스','쇼츠']
+    },
+    {
+      name: '마케팅 / 홍보',
+      reason: '성과, 확산, 참여 유도 경험을 수치와 함께 말하기 좋습니다.',
+      words: ['마케팅','홍보','광고','캠페인','성과','조회수','노출','전환','팔로워','참여','이벤트','브랜드','sns','분석']
+    },
+    {
+      name: '프로젝트 매니저',
+      reason: '일정 관리, 협업, 역할 조율 경험이 반복된다면 운영 역량이 강점입니다.',
+      words: ['PM','프로젝트','운영','관리','일정','조율','협업','팀','리더','커뮤니케이션','회의','발표','문제 해결']
+    },
+    {
+      name: '서비스 / UX 기획',
+      reason: '사용자 관점으로 문제를 정의하고 개선한 경험을 강조할 수 있습니다.',
+      words: ['UX','UI','서비스','사용자','리서치','설문','인터뷰','개선','기획서','프로토타입','피그마','figma','화면']
+    },
+    {
+      name: '교육 / 학습 콘텐츠',
+      reason: '학업, 설명, 자료 제작 경험이 많다면 전달력 중심으로 어필하기 좋습니다.',
+      words: ['학업','교육','강의','튜터','멘토링','자료','정리','발표','보고서','학습','설명','수업','스터디']
+    }
+  ];
+
+  return jobRules
+    .map(job=>{
+      const categoryBonus = data.filter(v=>job.words.includes(v.category)).length * 2;
+      const importantBonus = data.filter(v=>v.important && countMatches([
+        v.title,
+        v.category,
+        v.role,
+        Array.isArray(v.skills) ? v.skills.join(' ') : '',
+        v.desc,
+        v.result
+      ].join(' ').toLowerCase(), job.words) > 0).length * 2;
+      return {
+        ...job,
+        score: countMatches(text, job.words) + categoryBonus + importantBonus
+      };
+    })
+    .filter(job=>job.score > 0)
+    .sort((a,b)=>b.score - a.score)
+    .slice(0, 3);
+}
+
+function analyzeStrengths(data){
+  const text = getPortfolioText(data);
+  const strengthRules = [
+    {keyword:'기획력', words:['기획','구성','아이디어','주제','콘셉트','전략','기획서']},
+    {keyword:'실행력', words:['제작','진행','운영','완성','실행','업로드','참여','담당']},
+    {keyword:'문제 해결력', words:['문제','해결','개선','보완','수정','피드백','오류','효율']},
+    {keyword:'협업력', words:['협업','팀','조율','소통','회의','역할','리더','커뮤니케이션']},
+    {keyword:'분석력', words:['분석','성과','결과','데이터','조회수','전환','비교','평가']},
+    {keyword:'표현력', words:['영상','디자인','편집','스토리','발표','카피','콘텐츠','시각화']},
+    {keyword:'책임감', words:['알바','운영','관리','마감','일정','고객','응대','담당']},
+    {keyword:'성장지향', words:['학습','공부','도전','스터디','자격증','연습','개발','성장']}
+  ];
+
+  const scored = strengthRules
+    .map(item=>({...item, score: countMatches(text, item.words)}))
+    .filter(item=>item.score > 0)
+    .sort((a,b)=>b.score - a.score)
+    .slice(0, 6);
+
+  const skillCounts = new Map();
+  data.forEach(v=>{
+    (Array.isArray(v.skills) ? v.skills : []).forEach(skill=>{
+      const key = skill.trim();
+      if(key) skillCounts.set(key, (skillCounts.get(key) || 0) + 1);
     });
-    slide.appendChild(steps);
-    slides.push(slide);
   });
 
-  const closing = createSlide();
-  appendText(closing, 'h2', 'Closing', 'slide-title');
-  appendText(closing, 'p', `${profile.target || '지원 분야'}에서 지금까지 쌓은 경험을 더 구체적인 성과로 확장하겠습니다.`, 'subtitle');
-  appendText(closing, 'p', '기록된 포트폴리오와 자유경험은 저의 실행 과정, 협업 태도, 성장 방향을 보여주는 근거입니다.', 'footer-note');
-  slides.push(closing);
+  const frequentSkills = [...skillCounts.entries()]
+    .sort((a,b)=>b[1] - a[1])
+    .slice(0, 5)
+    .map(([skill])=>skill);
 
-  slides.forEach(slide=>deck.appendChild(slide));
-  return slides;
+  return {
+    strengths: scored.map(item=>item.keyword),
+    skills: frequentSkills
+  };
 }
 
-function showSlide(index){
-  const slides = [...document.querySelectorAll('.slide')];
-  if(!slides.length) return;
-  current = (index + slides.length) % slides.length;
-  slides.forEach((slide, i)=>slide.classList.toggle('active', i === current));
-  document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+function createRecommendationItem(job){
+  const item = document.createElement('div');
+  item.className = 'recommend-item';
+
+  const textBox = document.createElement('div');
+  appendText(textBox, 'strong', job.name);
+  appendText(textBox, 'div', job.reason, 'meta');
+
+  appendText(item, 'span', `${job.score}점`, 'score');
+  item.prepend(textBox);
+  return item;
 }
 
-function nextSlide(){showSlide(current + 1)}
-function prevSlide(){showSlide(current - 1)}
+function appendKeywordList(parent, words){
+  const list = document.createElement('div');
+  list.className = 'keyword-list';
+  words.forEach(word=>appendText(list, 'span', word, 'keyword'));
+  parent.appendChild(list);
+}
 
-document.addEventListener('keydown', event=>{
-  if(event.key === 'ArrowRight') nextSlide();
-  if(event.key === 'ArrowLeft') prevSlide();
-});
+function analyzePortfolio(){
+  const data = getData();
+  const result = document.getElementById('analysisResult');
+  toggleSection('portfolioAnalysisSection', true);
+  result.className = '';
+  result.replaceChildren();
 
-const slides = buildSlides();
-showSlide(0);
+  if(!data.length){
+    result.className = 'empty';
+    result.textContent = '분석할 기록이 없습니다. 먼저 포트폴리오 기록을 추가해 주세요.';
+    return;
+  }
+
+  const jobs = analyzeJobs(data);
+  const strengths = analyzeStrengths(data);
+
+  const grid = document.createElement('div');
+  grid.className = 'analysis-grid';
+
+  const jobPanel = document.createElement('div');
+  jobPanel.className = 'analysis-panel';
+  appendText(jobPanel, 'h3', '추천 직무');
+  const recommendList = document.createElement('div');
+  recommendList.className = 'recommend-list';
+  if(jobs.length){
+    jobs.forEach(job=>recommendList.appendChild(createRecommendationItem(job)));
+  }else{
+    appendText(recommendList, 'div', '아직 직무를 추천할 만큼의 단서가 부족합니다.', 'meta');
+  }
+  jobPanel.appendChild(recommendList);
+
+  const keywordPanel = document.createElement('div');
+  keywordPanel.className = 'analysis-panel';
+  appendText(keywordPanel, 'h3', '자기소개 강점 키워드');
+  const keywords = strengths.strengths.length ? strengths.strengths : ['성실함','책임감','성장 가능성'];
+  appendKeywordList(keywordPanel, keywords);
+
+  const skillPanel = document.createElement('div');
+  skillPanel.className = 'analysis-panel';
+  appendText(skillPanel, 'h3', '자주 드러난 스킬');
+  if(strengths.skills.length){
+    appendKeywordList(skillPanel, strengths.skills);
+  }else{
+    appendText(skillPanel, 'div', '스킬 칸에 더 많이 적을수록 추천이 정확해집니다.', 'meta');
+  }
+
+  const sentencePanel = document.createElement('div');
+  sentencePanel.className = 'analysis-panel';
+  appendText(sentencePanel, 'h3', '자기소개 문장 재료');
+  const topJob = jobs[0] ? jobs[0].name : '관심 직무';
+  const topKeywords = keywords.slice(0, 3).join(', ');
+  appendText(sentencePanel, 'p', `저는 여러 활동에서 ${topKeywords}을 바탕으로 결과물을 완성해 온 사람입니다. 특히 ${topJob}와 연결되는 경험을 통해 기획부터 실행, 결과 정리까지 맡아 본 점을 강점으로 말할 수 있습니다.`, 'sentence');
+
+  grid.append(jobPanel, keywordPanel, skillPanel, sentencePanel);
+  result.appendChild(grid);
+}
+
+function getExperienceText(data){
+  return data.map(v=>[
+    v.title,
+    v.type,
+    Array.isArray(v.keywords) ? v.keywords.join(' ') : '',
+    v.situation,
+    v.action,
+    v.result
+  ].join(' ')).join(' ').toLowerCase();
+}
+
+function getCombinedText(){
+  const profile = getProfileDraft();
+  return [
+    profile.education,
+    profile.major,
+    profile.target,
+    profile.note,
+    getPortfolioText(getData()),
+    getExperienceText(getExperiences()),
+    getApplications().map(v=>[v.description, v.link, v.deadline].join(' ')).join(' ')
+  ].join(' ').toLowerCase();
+}
+
+function getCombinedStrengths(){
+  const portfolioStrengths = analyzeStrengths(getData()).strengths;
+  const text = getCombinedText();
+  const extraRules = [
+    {keyword:'주도성', words:['주도','먼저','제안','리드','기획','도전']},
+    {keyword:'소통력', words:['소통','협업','조율','회의','갈등','설득','발표']},
+    {keyword:'문제 해결력', words:['문제','해결','개선','실패','보완','피드백']},
+    {keyword:'책임감', words:['책임','마감','관리','운영','성실','꾸준']},
+    {keyword:'학습력', words:['학습','공부','성장','스터디','연습','전공']},
+    {keyword:'실행력', words:['실행','제작','완성','진행','성과','결과']}
+  ];
+  const extraStrengths = extraRules
+    .map(rule=>({...rule, score: countMatches(text, rule.words)}))
+    .filter(rule=>rule.score > 0)
+    .sort((a,b)=>b.score - a.score)
+    .map(rule=>rule.keyword);
+  return [...new Set([...portfolioStrengths, ...extraStrengths])].slice(0, 5);
+}
+
+function getImportantMaterials(){
+  const portfolios = getData()
+    .filter(v=>v.important)
+    .concat(getData().filter(v=>!v.important))
+    .slice(0, 3)
+    .map(v=>v.title)
+    .filter(Boolean);
+  const experiences = getExperiences()
+    .filter(v=>v.important)
+    .concat(getExperiences().filter(v=>!v.important))
+    .slice(0, 3)
+    .map(v=>v.title)
+    .filter(Boolean);
+  return {portfolios, experiences};
+}
+
+function getCoverInputs(){
+  return {
+    target: document.getElementById('coverTarget').value.trim(),
+    question: document.getElementById('coverQuestion').value.trim(),
+    tone: document.getElementById('coverTone').value.trim()
+  };
+}
+
+function getQuestionType(question){
+  const text = question.toLowerCase();
+  if(text.includes('지원동기') || text.includes('지원 동기') || text.includes('포부')) return 'motivation';
+  if(text.includes('직무') || text.includes('역량') || text.includes('강점')) return 'competency';
+  if(text.includes('협업') || text.includes('갈등') || text.includes('소통')) return 'collaboration';
+  if(text.includes('성장') || text.includes('가치관') || text.includes('성격')) return 'growth';
+  if(text.includes('실패') || text.includes('도전') || text.includes('문제')) return 'challenge';
+  return 'general';
+}
+
+function scoreMaterialForQuestion(item, questionType){
+  const text = [
+    item.title,
+    item.category,
+    item.type,
+    item.role,
+    Array.isArray(item.skills) ? item.skills.join(' ') : '',
+    Array.isArray(item.keywords) ? item.keywords.join(' ') : '',
+    item.desc,
+    item.result,
+    item.situation,
+    item.action
+  ].join(' ').toLowerCase();
+  const rules = {
+    motivation: ['관심','지원','직무','목표','전공','기획','콘텐츠','성장'],
+    competency: ['역할','스킬','성과','분석','제작','기획','개선','결과'],
+    collaboration: ['협업','팀','소통','조율','갈등','회의','리더','역할'],
+    growth: ['성장','가치관','학습','배운','성격','책임','꾸준','도전'],
+    challenge: ['도전','실패','문제','해결','개선','피드백','보완','결과'],
+    general: ['기획','성과','협업','성장','문제','역할','스킬']
+  };
+  return countMatches(text, rules[questionType] || rules.general) + (item.important ? 3 : 0);
+}
+
+function getRecommendedMaterials(questionType){
+  const portfolioMaterials = getData().map(item=>({
+    title: item.title,
+    kind: '포트폴리오',
+    detail: item.result || item.desc || item.role || '',
+    score: scoreMaterialForQuestion(item, questionType)
+  }));
+  const experienceMaterials = getExperiences().map(item=>({
+    title: item.title,
+    kind: '자유경험',
+    detail: item.result || item.action || item.situation || '',
+    score: scoreMaterialForQuestion(item, questionType)
+  }));
+
+  return [...portfolioMaterials, ...experienceMaterials]
+    .filter(item=>item.title)
+    .sort((a,b)=>b.score - a.score)
+    .slice(0, 4);
+}
+
+function createOutlineItem(title, body){
+  const item = document.createElement('article');
+  item.className = 'outline-item';
+  appendText(item, 'h3', title);
+  appendText(item, 'p', body);
+  return item;
+}
+
+function generateCoverLetterOutline(force = true){
+  const result = document.getElementById('outlineResult');
+  if(!force && result.dataset.generated !== 'true') return;
+
+  const profile = getProfileDraft();
+  const portfolios = getData();
+  const experiences = getExperiences();
+  const hasData = Object.values(profile).some(Boolean) || portfolios.length || experiences.length;
+
+  result.className = '';
+  result.replaceChildren();
+
+  if(!hasData){
+    result.className = 'empty';
+    result.textContent = '개요를 만들 데이터가 없습니다. 인적사항, 포트폴리오, 자유경험 중 하나 이상을 입력해 주세요.';
+    result.dataset.generated = 'false';
+    return;
+  }
+
+  const jobs = analyzeJobs(portfolios);
+  const strengths = getCombinedStrengths();
+  const materials = getImportantMaterials();
+  const coverInputs = getCoverInputs();
+  const questionType = getQuestionType(coverInputs.question);
+  const recommendedMaterials = getRecommendedMaterials(questionType);
+  const target = coverInputs.target || profile.target || (jobs[0] ? jobs[0].name : '지원 직무');
+  const major = profile.major || profile.education || '나의 배경';
+  const topStrengths = strengths.length ? strengths.slice(0, 3).join(', ') : '성실함, 책임감, 성장 가능성';
+  const mainPortfolio = recommendedMaterials.find(v=>v.kind === '포트폴리오')?.title || materials.portfolios[0] || '대표 포트폴리오';
+  const mainExperience = recommendedMaterials.find(v=>v.kind === '자유경험')?.title || materials.experiences[0] || '자유경험 기록';
+  const questionText = coverInputs.question || '자기소개서 문항';
+  const tone = coverInputs.tone || '담백하고 구체적인';
+  const questionPlans = {
+    motivation: [
+      ['1. 지원동기: 관심이 생긴 계기', `${major}과 기록된 경험을 연결해 ${target}에 관심을 갖게 된 이유를 ${tone} 톤으로 시작합니다.`],
+      ['2. 직무 이해: 내가 본 핵심 역량', `${target}에서 중요하다고 보는 역량을 ${topStrengths} 중심으로 정리합니다.`],
+      ['3. 근거 경험: 대표 포트폴리오', `${mainPortfolio} 경험을 통해 관심이 행동으로 이어졌다는 점을 보여줍니다.`],
+      ['4. 입사 후 포부', `앞으로 ${target}에서 배우고 확장하고 싶은 방향을 구체적인 기여 방식으로 마무리합니다.`]
+    ],
+    competency: [
+      ['1. 결론: 나의 핵심 역량', `${target}에 맞는 강점을 ${topStrengths}로 먼저 제시합니다.`],
+      ['2. 근거 1: 포트폴리오 성과', `${mainPortfolio}에서 맡은 역할, 사용한 스킬, 결과를 순서대로 씁니다.`],
+      ['3. 근거 2: 경험에서 드러난 태도', `${mainExperience}를 통해 문제 해결 과정이나 협업 태도를 보완 근거로 제시합니다.`],
+      ['4. 직무 적용', `이 역량을 ${target} 업무에서 어떻게 활용할지 연결합니다.`]
+    ],
+    collaboration: [
+      ['1. 상황 소개', `${mainExperience}에서 협업이나 갈등이 있었던 상황을 간단히 설명합니다.`],
+      ['2. 나의 행동', `조율, 소통, 역할 분담처럼 직접 한 행동을 구체적으로 씁니다.`],
+      ['3. 결과와 배운 점', `결과뿐 아니라 이후 협업 방식이 어떻게 달라졌는지 정리합니다.`],
+      ['4. 직무 연결', `${target}에서도 같은 태도로 기여하겠다는 문장으로 마무리합니다.`]
+    ],
+    growth: [
+      ['1. 나를 설명하는 키워드', `${topStrengths} 중 가장 잘 맞는 키워드 하나로 시작합니다.`],
+      ['2. 형성 배경', `${major} 또는 자유경험에서 그 성향이 만들어진 배경을 설명합니다.`],
+      ['3. 대표 사례', `${mainExperience}를 사례로 들어 행동과 배운 점을 정리합니다.`],
+      ['4. 현재의 강점', `그 경험이 지금 ${target}에 어떤 강점으로 이어졌는지 마무리합니다.`]
+    ],
+    challenge: [
+      ['1. 도전/문제 상황', `${mainExperience} 또는 ${mainPortfolio}에서 어려웠던 지점을 구체적으로 제시합니다.`],
+      ['2. 해결 과정', `시도한 방법, 수정한 부분, 주변 피드백을 반영한 과정을 씁니다.`],
+      ['3. 결과', `성과나 배운 점을 수치, 변화, 완성물 중심으로 정리합니다.`],
+      ['4. 재발 방지와 성장', `이 경험 이후 일하는 방식이 어떻게 나아졌는지 연결합니다.`]
+    ],
+    general: [
+      ['1. 도입: 문항에 대한 한 문장 답', `"${questionText}"에 대해 가장 먼저 말하고 싶은 결론을 씁니다.`],
+      ['2. 핵심 강점', `${topStrengths}을 중심으로 나의 방향성을 정리합니다.`],
+      ['3. 대표 경험 1', `${mainPortfolio}를 직무 역량의 근거로 사용합니다.`],
+      ['4. 대표 경험 2', `${mainExperience}를 태도와 성장의 근거로 사용합니다.`],
+      ['5. 마무리', `${target}에서 이 경험을 어떻게 이어갈지 정리합니다.`]
+    ]
+  };
+
+  const list = document.createElement('div');
+  list.className = 'outline-list';
+  appendText(list, 'div', `문항: ${questionText}`, 'notice');
+  appendText(list, 'div', `지원 대상: ${target} / 추천 톤: ${tone}`, 'notice');
+  questionPlans[questionType].forEach(([title, body])=>list.appendChild(createOutlineItem(title, body)));
+
+  const materialPanel = document.createElement('div');
+  materialPanel.className = 'analysis-panel';
+  appendText(materialPanel, 'h3', '개요에 넣기 좋은 재료');
+  appendKeywordList(materialPanel, [
+    ...strengths.slice(0, 5),
+    ...recommendedMaterials.map(v=>`${v.kind}: ${v.title}`)
+  ].filter(Boolean));
+  recommendedMaterials.forEach(item=>{
+    appendText(materialPanel, 'div', `${item.kind} "${item.title}" 추천 이유: 문항 유형과 맞는 키워드가 많고, 자기소개서 근거 경험으로 연결하기 좋습니다.`, 'meta');
+  });
+
+  result.dataset.generated = 'true';
+  result.append(list, materialPanel);
+}
+
+function createCheckItem(label, ok, advice){
+  const item = document.createElement('div');
+  item.className = 'check-item';
+  const text = document.createElement('div');
+  appendText(text, 'strong', label);
+  appendText(text, 'div', advice, 'meta');
+  appendText(item, 'span', ok ? '완료' : '보완', ok ? 'check-ok' : 'check-miss');
+  item.prepend(text);
+  return item;
+}
+
+function checkCompleteness(){
+  const result = document.getElementById('completenessResult');
+  const profile = getProfileDraft();
+  const portfolios = getData();
+  const experiences = getExperiences();
+  const applications = getApplications();
+  const coverInputs = getCoverInputs();
+  const completePortfolios = portfolios.filter(v=>v.title && v.role && v.skills?.length && v.desc && v.result);
+  const completeExperiences = experiences.filter(v=>v.title && v.situation && v.action && v.result);
+  const importantCount = portfolios.filter(v=>v.important).length + experiences.filter(v=>v.important).length;
+
+  const checks = [
+    ['지원 직무 입력', Boolean(coverInputs.target || profile.target), '희망 직무나 회사/분야를 입력하면 개요가 더 정확해집니다.'],
+    ['자소서 문항 입력', Boolean(coverInputs.question), '실제 문항을 넣으면 지원동기, 협업, 직무역량 등 문항 유형에 맞춰 개요가 바뀝니다.'],
+    ['인적사항 핵심 정보', Boolean(profile.name && (profile.education || profile.major)), '이름과 학력/전공 또는 관심 분야가 있으면 도입 문단을 만들기 좋습니다.'],
+    ['포트폴리오 기록', portfolios.length >= 2, '최소 2개 이상 기록하면 대표 경험을 고르기 쉬워집니다.'],
+    ['완성된 포트폴리오', completePortfolios.length >= 1, '제목, 역할, 스킬, 설명, 성과가 모두 있는 포트폴리오가 1개 이상이면 좋습니다.'],
+    ['자유경험 STAR 구성', completeExperiences.length >= 1, '상황, 행동, 결과/배운 점이 모두 있는 자유경험이 1개 이상이면 자소서 근거가 탄탄해집니다.'],
+    ['중요 표시', importantCount >= 1, '자기소개서에 꼭 쓰고 싶은 경험은 별표로 표시해 주세요.'],
+    ['성과 구체화', portfolios.some(v=>/\d|%|명|회|개|원|시간|개월|년/.test(v.result || '')), '성과에 숫자나 규모가 있으면 문장이 훨씬 설득력 있어집니다.']
+    ,['지원공고 저장', applications.length >= 1, '관심 공고 링크와 마감일을 저장하면 지원 일정을 놓치기 어렵습니다.']
+    ,['데드라인 입력', applications.some(v=>v.deadline), '마감일이 있으면 우선순위를 잡기 쉽습니다.']
+  ];
+
+  const done = checks.filter(([,ok])=>ok).length;
+  result.replaceChildren();
+  const panel = document.createElement('div');
+  panel.className = 'analysis-panel';
+  appendText(panel, 'h3', `완성도 점검: ${done}/${checks.length}`);
+  const list = document.createElement('div');
+  list.className = 'check-list';
+  checks.forEach(([label, ok, advice])=>list.appendChild(createCheckItem(label, ok, advice)));
+  panel.appendChild(list);
+  result.appendChild(panel);
+}
+
+function getOutlineText(){
+  const outline = document.getElementById('outlineResult');
+  const completeness = document.getElementById('completenessResult');
+  const title = '자기소개서 맞춤 개요';
+  const outlineText = outline.classList.contains('empty') ? '' : outline.innerText.trim();
+  const completenessText = completeness.innerText.trim();
+  return [title, outlineText, completenessText].filter(Boolean).join('\n\n');
+}
+
+function exportOutlineText(){
+  if(document.getElementById('outlineResult').classList.contains('empty')){
+    generateCoverLetterOutline();
+  }
+  const text = getOutlineText();
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cover-letter-outline.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function printOutlinePdf(){
+  if(document.getElementById('outlineResult').classList.contains('empty')){
+    generateCoverLetterOutline();
+  }
+  const text = getOutlineText().replace(/[&<>"']/g, char=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[char]));
+  const printWindow = window.open('', '_blank');
+  if(!printWindow){
+    alert('팝업이 차단되어 PDF 창을 열 수 없습니다.');
+    return;
+  }
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+      <meta charset="UTF-8">
+      <title>자기소개서 맞춤 개요</title>
+      <style>
+        body{font-family:Arial,"Noto Sans KR",sans-serif;line-height:1.7;color:#111827;padding:32px}
+        h1{font-size:24px;margin:0 0 18px}
+        pre{white-space:pre-wrap;font:inherit}
+      </style>
+    </head>
+    <body>
+      <h1>자기소개서 맞춤 개요</h1>
+      <pre>${text}</pre>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+}
+
+function saveSlideTemplate(){
+  const value = document.getElementById('slideTemplate').value;
+  writeJson(SLIDE_TEMPLATE_KEY, value);
+}
+
+function renderBackupStatus(){
+  const saved = readJson(BACKUP_KEY, '');
+  const el = document.getElementById('backupStatus');
+  el.textContent = saved ? `최근 백업: ${saved}` : '최근 백업 기록이 없습니다.';
+}
+
+function exportData(){
+  const data = JSON.stringify({
+    profiles: getProfiles(),
+    activeProfileId: getActiveProfileId(),
+    profile: getProfile(),
+    portfolio: readJson(STORAGE_KEY, []),
+    experiences: readJson(EXPERIENCE_KEY, []),
+    applications: readJson(APPLICATION_KEY, []),
+    slideTemplate: readJson(SLIDE_TEMPLATE_KEY, 'clean')
+  }, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  writeJson(BACKUP_KEY, new Date().toLocaleString('ko-KR'));
+  renderBackupStatus();
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(Array.isArray(parsed)){
+        saveData(parsed);
+      }else if(parsed && typeof parsed === 'object'){
+        if(Array.isArray(parsed.profiles)) saveProfiles(parsed.profiles);
+        if(parsed.activeProfileId) setActiveProfileId(parsed.activeProfileId);
+        if(parsed.profile && typeof parsed.profile === 'object' && !Array.isArray(parsed.profiles)) saveProfileData(parsed.profile);
+        if(Array.isArray(parsed.portfolio)) writeJson(STORAGE_KEY, parsed.portfolio);
+        if(Array.isArray(parsed.experiences)) writeJson(EXPERIENCE_KEY, parsed.experiences);
+        if(Array.isArray(parsed.applications)) writeJson(APPLICATION_KEY, parsed.applications);
+        if(parsed.slideTemplate) writeJson(SLIDE_TEMPLATE_KEY, parsed.slideTemplate);
+      }else{
+        throw new Error('Invalid portfolio data');
+      }
+      resetForm();
+      resetExperienceForm();
+      resetApplicationForm();
+      ensureProfileSystem();
+      renderProfileSelector();
+      renderProfile();
+      renderExperiences();
+      renderApplications();
+      render();
+      initSlideTemplate();
+      generateCoverLetterOutline(false);
+    }catch{
+      alert('가져올 수 없는 JSON 파일입니다.');
+    }finally{
+      e.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function initSlideTemplate(){
+  document.getElementById('slideTemplate').value = readJson(SLIDE_TEMPLATE_KEY, 'clean');
+}
+
+ensureProfileSystem();
+renderProfileSelector();
+renderProfile();
+renderExperiences();
+renderApplications();
+initSlideTemplate();
+renderBackupStatus();
+render();
 </script>
 </body>
 </html>
