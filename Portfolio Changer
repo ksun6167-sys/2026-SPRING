@@ -22,13 +22,18 @@
 body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
 .container{max-width:1040px;margin:0 auto;padding:28px 18px 40px}
 h1{text-align:center;margin:0 0 22px;font-size:28px}
-.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:18px}
 .tab-button{background:#e5e7eb;color:#343942;border:1px solid #d1d5db}
 .tab-button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
 .section-title h2{margin:0;font-size:20px}
+.section-title button{min-height:34px}
+.collapsible.collapsed .collapsible-body{display:none}
+.collapse-toggle{background:#e5e7eb;color:#343942;border:1px solid #d1d5db}
+.profile-switcher{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.profile-switcher select{flex:1 1 260px}
 .input-box{background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:8px;margin-bottom:18px}
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .full{grid-column:1/-1}
@@ -114,6 +119,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .status-chip{display:inline-flex;align-items:center;border-radius:999px;background:#eef2ff;color:#3730a3;padding:4px 9px;font-size:12px;font-weight:800}
 .draft-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .backup-note{font-size:13px;color:var(--muted)}
+.dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.dashboard-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.dashboard-card h2{margin:0 0 10px;font-size:18px}
+.quick-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mini-list{display:flex;flex-direction:column;gap:8px}
+.mini-item{border:1px solid var(--line);border-radius:8px;background:#fafafa;padding:10px}
+.mini-item strong{display:block;margin-bottom:4px}
+.dday{display:inline-flex;border-radius:999px;padding:4px 9px;font-size:12px;font-weight:800}
+.dday-ok{background:#dcfce7;color:#166534}
+.dday-soon{background:#fef3c7;color:#92400e}
+.dday-today{background:#fee2e2;color:#991b1b}
+.dday-past{background:#e5e7eb;color:#4b5563}
 @media (max-width:640px){
   .tabs{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
@@ -122,6 +139,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   .stat-row{grid-template-columns:1fr}
   .timeline-item{grid-template-columns:1fr}
   .profile-summary{grid-template-columns:1fr}
+  .dashboard-grid{grid-template-columns:1fr}
   .draft-grid{grid-template-columns:1fr}
   .toolbar select{max-width:none}
   .card h3{padding-right:0;margin-top:38px}
@@ -133,19 +151,34 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 <main class="container">
   <h1>자기소개서 포트폴리오 관리</h1>
 
+  <section class="profile-switcher" aria-label="현재 인적사항 선택">
+    <select id="activeProfile" onchange="setActiveProfile(this.value)"></select>
+    <button type="button" onclick="newProfile()">새 인적사항</button>
+    <button type="button" class="delete" onclick="deleteActiveProfile()">현재 인적사항 삭제</button>
+  </section>
+
   <nav class="tabs" aria-label="기록 탭">
-    <button type="button" class="tab-button active" data-tab="profile" onclick="switchTab('profile')">인적사항</button>
+    <button type="button" class="tab-button active" data-tab="dashboard" onclick="switchTab('dashboard')">대시보드</button>
+    <button type="button" class="tab-button" data-tab="profile" onclick="switchTab('profile')">인적사항</button>
     <button type="button" class="tab-button" data-tab="portfolio" onclick="switchTab('portfolio')">포트폴리오</button>
     <button type="button" class="tab-button" data-tab="experience" onclick="switchTab('experience')">자유경험</button>
     <button type="button" class="tab-button" data-tab="application" onclick="switchTab('application')">지원공고</button>
   </nav>
 
-  <section id="tab-profile" class="tab-panel active" aria-label="인적사항">
+  <section id="tab-dashboard" class="tab-panel active" aria-label="대시보드">
+    <section class="dashboard-grid" id="dashboard"></section>
+  </section>
+
+  <section id="tab-profile" class="tab-panel" aria-label="인적사항">
     <section class="input-box">
       <div class="section-title">
         <h2>인적사항</h2>
-        <button type="button" onclick="saveProfile()">저장</button>
+        <div class="toolbar" style="margin:0">
+          <button type="button" class="collapse-toggle" onclick="toggleSection('profileForm')">열기/닫기</button>
+          <button type="button" onclick="saveProfile()">저장하고 기록 입력</button>
+        </div>
       </div>
+      <div id="profileForm" class="collapsible-body">
       <div class="form-grid">
         <input id="profileName" placeholder="이름" autocomplete="off">
         <input id="profileBirth" type="date" aria-label="생년월일">
@@ -156,12 +189,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
         <input id="profileTarget" class="full" placeholder="희망 직무 / 지원 분야" autocomplete="off">
         <textarea id="profileNote" class="full" placeholder="성향, 가치관, 자기소개에 꼭 넣고 싶은 정보"></textarea>
       </div>
+      </div>
       <div id="profileSummary" class="profile-summary"></div>
     </section>
   </section>
 
   <section id="tab-portfolio" class="tab-panel" aria-label="포트폴리오">
-  <section class="input-box" aria-label="포트폴리오 기록 입력">
+  <section class="input-box collapsible collapsed" aria-label="포트폴리오 기록 입력" id="portfolioInputSection">
+    <div class="section-title">
+      <h2>포트폴리오 입력</h2>
+      <button type="button" class="collapse-toggle" onclick="toggleSection('portfolioInputSection')">열기/닫기</button>
+    </div>
+    <div class="collapsible-body">
     <p class="notice" id="formStatus">새 기록을 추가하는 중입니다.</p>
     <div class="form-grid">
       <input id="title" placeholder="제목" autocomplete="off">
@@ -183,9 +222,15 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
       <button type="button" id="saveButton" onclick="add()">추가</button>
       <button type="button" class="dark" onclick="resetForm()">취소</button>
     </div>
+    </div>
   </section>
 
-  <section class="toolbar" aria-label="검색 및 필터">
+  <section class="input-box collapsible collapsed" aria-label="검색 및 필터" id="portfolioFilterSection">
+    <div class="section-title">
+      <h2>검색 / 필터</h2>
+      <button type="button" class="collapse-toggle" onclick="toggleSection('portfolioFilterSection')">열기/닫기</button>
+    </div>
+  <section class="toolbar collapsible-body">
     <input id="search" placeholder="검색" oninput="render()">
     <select id="filter" onchange="render()">
       <option value="all">전체</option>
@@ -205,21 +250,32 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
     <button type="button" onclick="showPortfolio()">포트폴리오 보기</button>
     <button type="button" class="dark" onclick="analyzePortfolio()">AI 분석</button>
   </section>
-
-  <section class="analysis-box" aria-label="AI 포트폴리오 분석">
-    <div class="analysis-head">
-      <h2>AI 포트폴리오 분석</h2>
-      <button type="button" onclick="analyzePortfolio()">다시 분석</button>
-    </div>
-    <div id="analysisResult" class="empty">기록을 추가한 뒤 AI 분석을 눌러 직무와 자기소개 키워드를 추천받아 보세요.</div>
   </section>
 
-  <section class="visual-box" aria-label="포트폴리오 시각화">
+  <section class="analysis-box collapsible collapsed" aria-label="AI 포트폴리오 분석" id="portfolioAnalysisSection">
+    <div class="analysis-head">
+      <h2>AI 포트폴리오 분석</h2>
+      <div class="toolbar" style="margin:0">
+        <button type="button" class="collapse-toggle" onclick="toggleSection('portfolioAnalysisSection')">열기/닫기</button>
+        <button type="button" onclick="analyzePortfolio()">다시 분석</button>
+      </div>
+    </div>
+    <div class="collapsible-body">
+      <div id="analysisResult" class="empty">기록을 추가한 뒤 AI 분석을 눌러 직무와 자기소개 키워드를 추천받아 보세요.</div>
+    </div>
+  </section>
+
+  <section class="visual-box collapsible collapsed" aria-label="포트폴리오 시각화" id="portfolioVisualSection">
     <div class="visual-head">
       <h2>포트폴리오 시각화</h2>
-      <button type="button" onclick="renderVisuals()">새로고침</button>
+      <div class="toolbar" style="margin:0">
+        <button type="button" class="collapse-toggle" onclick="toggleSection('portfolioVisualSection')">열기/닫기</button>
+        <button type="button" onclick="renderVisuals()">새로고침</button>
+      </div>
     </div>
-    <div id="visualResult" class="empty">기록을 추가하면 카테고리, 스킬, 활동 기간이 차트로 표시됩니다.</div>
+    <div class="collapsible-body">
+      <div id="visualResult" class="empty">기록을 추가하면 카테고리, 스킬, 활동 기간이 차트로 표시됩니다.</div>
+    </div>
   </section>
 
   <section class="list" id="list" aria-live="polite"></section>
@@ -231,7 +287,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   </section>
 
   <section id="tab-experience" class="tab-panel" aria-label="자유경험">
-    <section class="input-box">
+    <section class="input-box collapsible collapsed" id="experienceInputSection">
+      <div class="section-title">
+        <h2>자유경험 입력</h2>
+        <button type="button" class="collapse-toggle" onclick="toggleSection('experienceInputSection')">열기/닫기</button>
+      </div>
+      <div class="collapsible-body">
       <p class="notice" id="experienceStatus">새 자유경험을 추가하는 중입니다.</p>
       <div class="form-grid">
         <input id="experienceTitle" placeholder="경험 제목" autocomplete="off">
@@ -253,42 +314,42 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
         <button type="button" id="experienceSaveButton" onclick="addExperience()">추가</button>
         <button type="button" class="dark" onclick="resetExperienceForm()">취소</button>
       </div>
+      </div>
     </section>
     <section class="experience-list" id="experienceList" aria-live="polite"></section>
   </section>
 
   <section id="tab-application" class="tab-panel" aria-label="지원공고">
-    <section class="input-box">
+    <section class="input-box collapsible collapsed" id="applicationInputSection">
+      <div class="section-title">
+        <h2>지원공고 입력</h2>
+        <button type="button" class="collapse-toggle" onclick="toggleSection('applicationInputSection')">열기/닫기</button>
+      </div>
+      <div class="collapsible-body">
       <p class="notice" id="applicationStatus">새 지원공고를 추가하는 중입니다.</p>
       <div class="form-grid">
-        <input id="appCompany" placeholder="회사명 / 기관명" autocomplete="off">
-        <input id="appRole" placeholder="지원 직무" autocomplete="off">
         <input id="appDeadline" type="date" aria-label="마감일">
-        <select id="appStatus">
-          <option value="관심">관심</option>
-          <option value="작성중">작성중</option>
-          <option value="제출완료">제출완료</option>
-          <option value="보류">보류</option>
-        </select>
-        <textarea id="appQuestion" class="full" placeholder="자기소개서 문항"></textarea>
-        <textarea id="appDraft" class="full" placeholder="초안"></textarea>
-        <textarea id="appFinal" class="full" placeholder="최종본"></textarea>
-        <input id="appLink" class="full" placeholder="공고 링크 (선택)" autocomplete="off">
+        <input id="appLink" placeholder="공고 링크" autocomplete="off">
+        <textarea id="appDescription" class="full" placeholder="간략한 설명 (회사명, 직무, 메모 등)"></textarea>
       </div>
       <div class="toolbar" style="margin:12px 0 0">
         <button type="button" id="applicationSaveButton" onclick="addApplication()">추가</button>
         <button type="button" class="dark" onclick="resetApplicationForm()">취소</button>
-        <button type="button" onclick="useApplicationForOutline()">이 공고로 개요 준비</button>
+      </div>
       </div>
     </section>
     <section class="application-list" id="applicationList" aria-live="polite"></section>
   </section>
 
-  <section class="outline-box" aria-label="자기소개서 개요 생성">
+  <section class="outline-box collapsible collapsed" aria-label="자기소개서 개요 생성" id="coverToolSection">
     <div class="analysis-head">
       <h2>맞춤형 자기소개서 도구</h2>
-      <button type="button" onclick="generateCoverLetterOutline()">맞춤 개요 생성</button>
+      <div class="toolbar" style="margin:0">
+        <button type="button" class="collapse-toggle" onclick="toggleSection('coverToolSection')">열기/닫기</button>
+        <button type="button" onclick="generateCoverLetterOutline()">맞춤 개요 생성</button>
+      </div>
     </div>
+    <div class="collapsible-body">
     <div class="form-grid">
       <input id="coverTarget" placeholder="지원 직무 / 회사 / 분야" autocomplete="off">
       <input id="coverTone" placeholder="원하는 톤 (예: 담백하게, 열정적으로)" autocomplete="off">
@@ -310,12 +371,15 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
     </div>
     <div id="outlineResult" class="empty">인적사항, 포트폴리오, 자유경험을 바탕으로 자기소개서 개요를 만들어 줍니다.</div>
     <div id="completenessResult" style="margin-top:12px"></div>
+    </div>
   </section>
 </main>
 
 <script>
 const STORAGE_KEY = 'portfolio';
 const PROFILE_KEY = 'portfolioProfile';
+const PROFILES_KEY = 'portfolioProfiles';
+const ACTIVE_PROFILE_KEY = 'portfolioActiveProfile';
 const EXPERIENCE_KEY = 'portfolioExperiences';
 const APPLICATION_KEY = 'portfolioApplications';
 const BACKUP_KEY = 'portfolioBackupAt';
@@ -358,14 +422,9 @@ const experienceFields = {
 };
 
 const applicationFields = {
-  company: document.getElementById('appCompany'),
-  role: document.getElementById('appRole'),
   deadline: document.getElementById('appDeadline'),
-  status: document.getElementById('appStatus'),
-  question: document.getElementById('appQuestion'),
-  draft: document.getElementById('appDraft'),
-  final: document.getElementById('appFinal'),
-  link: document.getElementById('appLink')
+  link: document.getElementById('appLink'),
+  description: document.getElementById('appDescription')
 };
 
 function readJson(key, fallback){
@@ -381,7 +440,140 @@ function writeJson(key, value){
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function toggleSection(id, open){
+  const section = document.getElementById(id);
+  if(!section) return;
+  if(section.classList.contains('collapsible-body')){
+    section.style.display = typeof open === 'boolean'
+      ? (open ? '' : 'none')
+      : (section.style.display === 'none' ? '' : 'none');
+    return;
+  }
+  if(typeof open === 'boolean') section.classList.toggle('collapsed', !open);
+  else section.classList.toggle('collapsed');
+}
+
+function makeId(prefix){
+  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
+function getProfiles(){
+  const profiles = readJson(PROFILES_KEY, []);
+  return Array.isArray(profiles) ? profiles : [];
+}
+
+function saveProfiles(profiles){
+  writeJson(PROFILES_KEY, profiles);
+}
+
+function getActiveProfileId(){
+  return localStorage.getItem(ACTIVE_PROFILE_KEY) || '';
+}
+
+function setActiveProfileId(id){
+  localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+}
+
+function ensureProfileSystem(){
+  let profiles = getProfiles();
+  if(!profiles.length){
+    const oldProfile = readJson(PROFILE_KEY, {});
+    const id = makeId('profile');
+    const profile = {
+      id,
+      name: oldProfile.name || '기본 인적사항',
+      birth: oldProfile.birth || '',
+      education: oldProfile.education || '',
+      major: oldProfile.major || '',
+      email: oldProfile.email || '',
+      phone: oldProfile.phone || '',
+      target: oldProfile.target || '',
+      note: oldProfile.note || ''
+    };
+    profiles = [profile];
+    saveProfiles(profiles);
+    setActiveProfileId(id);
+    [STORAGE_KEY, EXPERIENCE_KEY, APPLICATION_KEY].forEach(key=>{
+      const data = readJson(key, []);
+      if(Array.isArray(data)){
+        writeJson(key, data.map(item=>item.profileId ? item : {...item, profileId: id}));
+      }
+    });
+  }
+  if(!getActiveProfileId() || !profiles.some(profile=>profile.id === getActiveProfileId())){
+    setActiveProfileId(profiles[0].id);
+  }
+}
+
+function getActiveProfile(){
+  return getProfiles().find(profile=>profile.id === getActiveProfileId()) || getProfiles()[0] || {};
+}
+
+function renderProfileSelector(){
+  const select = document.getElementById('activeProfile');
+  const activeId = getActiveProfileId();
+  select.replaceChildren();
+  getProfiles().forEach(profile=>{
+    const option = document.createElement('option');
+    option.value = profile.id;
+    option.textContent = profile.name || profile.target || '이름 없는 인적사항';
+    option.selected = profile.id === activeId;
+    select.appendChild(option);
+  });
+}
+
+function setActiveProfile(id){
+  setActiveProfileId(id);
+  resetForm();
+  resetExperienceForm();
+  resetApplicationForm();
+  renderProfile();
+  renderExperiences();
+  renderApplications();
+  render();
+  renderDashboard();
+  generateCoverLetterOutline(false);
+}
+
+function newProfile(){
+  const id = makeId('profile');
+  const profile = {id, name:'', birth:'', education:'', major:'', email:'', phone:'', target:'', note:''};
+  saveProfiles([...getProfiles(), profile]);
+  setActiveProfileId(id);
+  renderProfileSelector();
+  renderProfile();
+  renderDashboard();
+  switchTab('profile');
+}
+
+function deleteActiveProfile(){
+  const profiles = getProfiles();
+  if(profiles.length <= 1){
+    alert('최소 1개의 인적사항은 필요합니다.');
+    return;
+  }
+  const active = getActiveProfile();
+  if(!confirm(`"${active.name || '이름 없는 인적사항'}"과 연결된 기록을 모두 삭제할까요?`)) return;
+  const nextProfiles = profiles.filter(profile=>profile.id !== active.id);
+  saveProfiles(nextProfiles);
+  [STORAGE_KEY, EXPERIENCE_KEY, APPLICATION_KEY].forEach(key=>{
+    const data = readJson(key, []);
+    if(Array.isArray(data)) writeJson(key, data.filter(item=>item.profileId !== active.id));
+  });
+  setActiveProfileId(nextProfiles[0].id);
+  renderProfileSelector();
+  renderProfile();
+  renderExperiences();
+  renderApplications();
+  render();
+  renderDashboard();
+}
+
 function switchTab(tabName){
+  if(!['profile','dashboard'].includes(tabName) && !getActiveProfile().name){
+    alert('먼저 인적사항의 이름을 저장해 주세요.');
+    tabName = 'profile';
+  }
   document.querySelectorAll('.tab-button').forEach(button=>{
     button.classList.toggle('active', button.dataset.tab === tabName);
   });
@@ -391,8 +583,7 @@ function switchTab(tabName){
 }
 
 function getProfile(){
-  const data = readJson(PROFILE_KEY, {});
-  return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+  return getActiveProfile();
 }
 
 function getProfileDraft(){
@@ -405,38 +596,51 @@ function getProfileDraft(){
 }
 
 function saveProfileData(data){
-  writeJson(PROFILE_KEY, data);
+  const activeId = getActiveProfileId();
+  const profiles = getProfiles().map(profile=>profile.id === activeId ? {...profile, ...data, id: activeId} : profile);
+  saveProfiles(profiles);
+  writeJson(PROFILE_KEY, {...data, id: activeId});
+  renderProfileSelector();
 }
 
 function getExperiences(){
   const data = readJson(EXPERIENCE_KEY, []);
-  return Array.isArray(data) ? data : [];
+  return Array.isArray(data) ? data.filter(item=>!item.profileId || item.profileId === getActiveProfileId()) : [];
 }
 
 function saveExperiences(data){
-  writeJson(EXPERIENCE_KEY, data);
+  const all = readJson(EXPERIENCE_KEY, []);
+  const activeId = getActiveProfileId();
+  const others = Array.isArray(all) ? all.filter(item=>item.profileId && item.profileId !== activeId) : [];
+  writeJson(EXPERIENCE_KEY, [...others, ...data.map(item=>({...item, profileId: activeId}))]);
 }
 
 function getApplications(){
   const data = readJson(APPLICATION_KEY, []);
-  return Array.isArray(data) ? data : [];
+  return Array.isArray(data) ? data.filter(item=>!item.profileId || item.profileId === getActiveProfileId()) : [];
 }
 
 function saveApplications(data){
-  writeJson(APPLICATION_KEY, data);
+  const all = readJson(APPLICATION_KEY, []);
+  const activeId = getActiveProfileId();
+  const others = Array.isArray(all) ? all.filter(item=>item.profileId && item.profileId !== activeId) : [];
+  writeJson(APPLICATION_KEY, [...others, ...data.map(item=>({...item, profileId: activeId}))]);
 }
 
 function getData(){
   try{
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.filter(item=>!item.profileId || item.profileId === getActiveProfileId()) : [];
   }catch{
     return [];
   }
 }
 
 function saveData(data){
-  writeJson(STORAGE_KEY, data);
+  const all = readJson(STORAGE_KEY, []);
+  const activeId = getActiveProfileId();
+  const others = Array.isArray(all) ? all.filter(item=>item.profileId && item.profileId !== activeId) : [];
+  writeJson(STORAGE_KEY, [...others, ...data.map(item=>({...item, profileId: activeId}))]);
 }
 
 function saveProfile(){
@@ -444,8 +648,15 @@ function saveProfile(){
   Object.entries(profileFields).forEach(([key, field])=>{
     profile[key] = field.value.trim();
   });
+  if(!profile.name){
+    alert('이름을 입력해 주세요.');
+    profileFields.name.focus();
+    return;
+  }
   saveProfileData(profile);
   renderProfile();
+  renderDashboard();
+  switchTab('portfolio');
   generateCoverLetterOutline(false);
 }
 
@@ -499,6 +710,7 @@ function getFormItem(previous){
     desc: fields.desc.value.trim(),
     result: fields.result.value.trim(),
     link: normalizeUrl(fields.link.value),
+    profileId: previous ? previous.profileId || getActiveProfileId() : getActiveProfileId(),
     important: previous ? Boolean(previous.important) : false
   };
 }
@@ -513,6 +725,11 @@ function add(){
     fields.title.focus();
     return;
   }
+  if(!getActiveProfileId()){
+    alert('먼저 인적사항을 저장해 주세요.');
+    switchTab('profile');
+    return;
+  }
 
   const nextData = editId
     ? data.map(v=>v.id === editId ? item : v)
@@ -520,7 +737,9 @@ function add(){
 
   saveData(nextData);
   resetForm();
+  toggleSection('portfolioInputSection', false);
   render();
+  renderDashboard();
 }
 
 function resetForm(){
@@ -548,6 +767,7 @@ function editItem(id){
   editId = id;
   document.getElementById('saveButton').textContent = '수정 저장';
   document.getElementById('formStatus').textContent = `"${v.title}" 기록을 수정하는 중입니다.`;
+  toggleSection('portfolioInputSection', true);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -563,6 +783,7 @@ function remove(id){
   saveData(getData().filter(v=>v.id !== id));
   if(editId === id) resetForm();
   render();
+  renderDashboard();
 }
 
 function getExperienceFormItem(previous){
@@ -575,6 +796,7 @@ function getExperienceFormItem(previous){
     situation: experienceFields.situation.value.trim(),
     action: experienceFields.action.value.trim(),
     result: experienceFields.result.value.trim(),
+    profileId: previous ? previous.profileId || getActiveProfileId() : getActiveProfileId(),
     important: previous ? Boolean(previous.important) : false
   };
 }
@@ -596,7 +818,9 @@ function addExperience(){
 
   saveExperiences(nextData);
   resetExperienceForm();
+  toggleSection('experienceInputSection', false);
   renderExperiences();
+  renderDashboard();
   generateCoverLetterOutline(false);
 }
 
@@ -624,6 +848,7 @@ function editExperience(id){
   document.getElementById('experienceSaveButton').textContent = '수정 저장';
   document.getElementById('experienceStatus').textContent = `"${item.title}" 경험을 수정하는 중입니다.`;
   switchTab('experience');
+  toggleSection('experienceInputSection', true);
 }
 
 function removeExperience(id){
@@ -632,6 +857,7 @@ function removeExperience(id){
   saveExperiences(getExperiences().filter(v=>v.id !== id));
   if(experienceEditId === id) resetExperienceForm();
   renderExperiences();
+  renderDashboard();
   generateCoverLetterOutline(false);
 }
 
@@ -639,29 +865,26 @@ function toggleExperienceStar(id){
   const data = getExperiences().map(v=>v.id === id ? {...v, important: !v.important} : v);
   saveExperiences(data);
   renderExperiences();
+  renderDashboard();
   generateCoverLetterOutline(false);
 }
 
 function getApplicationFormItem(){
   return {
     id: applicationEditId || Date.now(),
-    company: applicationFields.company.value.trim(),
-    role: applicationFields.role.value.trim(),
     deadline: applicationFields.deadline.value.trim(),
-    status: applicationFields.status.value,
-    question: applicationFields.question.value.trim(),
-    draft: applicationFields.draft.value.trim(),
-    final: applicationFields.final.value.trim(),
-    link: normalizeUrl(applicationFields.link.value)
+    link: normalizeUrl(applicationFields.link.value),
+    description: applicationFields.description.value.trim(),
+    profileId: getActiveProfileId()
   };
 }
 
 function addApplication(){
   const data = getApplications();
   const item = getApplicationFormItem();
-  if(!item.company || !item.role){
-    alert('회사명과 지원 직무를 입력해 주세요.');
-    applicationFields.company.focus();
+  if(!item.link && !item.description){
+    alert('공고 링크나 간략한 설명을 입력해 주세요.');
+    applicationFields.link.focus();
     return;
   }
   const nextData = applicationEditId
@@ -669,7 +892,9 @@ function addApplication(){
     : [...data, item];
   saveApplications(nextData);
   resetApplicationForm();
+  toggleSection('applicationInputSection', false);
   renderApplications();
+  renderDashboard();
   checkCompleteness();
 }
 
@@ -686,42 +911,39 @@ function resetApplicationForm(){
 function editApplication(id){
   const item = getApplications().find(v=>v.id === id);
   if(!item) return;
-  applicationFields.company.value = item.company || '';
-  applicationFields.role.value = item.role || '';
   applicationFields.deadline.value = item.deadline || '';
-  applicationFields.status.value = item.status || '관심';
-  applicationFields.question.value = item.question || '';
-  applicationFields.draft.value = item.draft || '';
-  applicationFields.final.value = item.final || '';
   applicationFields.link.value = item.link || '';
+  applicationFields.description.value = item.description || item.question || `${item.company || ''} ${item.role || ''}`.trim();
   applicationEditId = id;
   document.getElementById('applicationSaveButton').textContent = '수정 저장';
-  document.getElementById('applicationStatus').textContent = `"${item.company} ${item.role}" 공고를 수정하는 중입니다.`;
+  document.getElementById('applicationStatus').textContent = '지원공고를 수정하는 중입니다.';
   switchTab('application');
+  toggleSection('applicationInputSection', true);
 }
 
 function removeApplication(id){
   const item = getApplications().find(v=>v.id === id);
-  if(!item || !confirm(`"${item.company} ${item.role}" 공고를 삭제할까요?`)) return;
+  if(!item || !confirm('이 지원공고를 삭제할까요?')) return;
   saveApplications(getApplications().filter(v=>v.id !== id));
   if(applicationEditId === id) resetApplicationForm();
   renderApplications();
+  renderDashboard();
   checkCompleteness();
 }
 
 function useApplication(id){
   const item = getApplications().find(v=>v.id === id);
   if(!item) return;
-  document.getElementById('coverTarget').value = `${item.company} ${item.role}`.trim();
-  document.getElementById('coverQuestion').value = item.question || '';
+  document.getElementById('coverTarget').value = item.description || '';
+  document.getElementById('coverQuestion').value = item.description || '';
   switchTab('application');
   generateCoverLetterOutline();
 }
 
 function useApplicationForOutline(){
   const item = getApplicationFormItem();
-  document.getElementById('coverTarget').value = `${item.company} ${item.role}`.trim();
-  document.getElementById('coverQuestion').value = item.question || '';
+  document.getElementById('coverTarget').value = item.description || '';
+  document.getElementById('coverQuestion').value = item.description || '';
   generateCoverLetterOutline();
 }
 
@@ -731,6 +953,98 @@ function appendText(parent, tag, text, className){
   el.textContent = text;
   parent.appendChild(el);
   return el;
+}
+
+function getDday(deadline){
+  if(!deadline) return {label:'마감일 없음', className:'dday-past', days:null};
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const target = new Date(deadline);
+  target.setHours(0,0,0,0);
+  const days = Math.round((target - today) / 86400000);
+  if(days < 0) return {label:'마감 지남', className:'dday-past', days};
+  if(days === 0) return {label:'오늘 마감', className:'dday-today', days};
+  if(days <= 3) return {label:`D-${days}`, className:'dday-soon', days};
+  return {label:`D-${days}`, className:'dday-ok', days};
+}
+
+function appendMiniItem(parent, title, meta, badge){
+  const item = document.createElement('div');
+  item.className = 'mini-item';
+  appendText(item, 'strong', title);
+  if(meta) appendText(item, 'div', meta, 'meta');
+  if(badge) appendText(item, 'span', badge.label, `dday ${badge.className}`);
+  parent.appendChild(item);
+}
+
+function createDashboardCard(title){
+  const card = document.createElement('article');
+  card.className = 'dashboard-card';
+  appendText(card, 'h2', title);
+  return card;
+}
+
+function renderDashboard(){
+  const container = document.getElementById('dashboard');
+  if(!container) return;
+  container.replaceChildren();
+
+  const profile = getActiveProfile();
+  const portfolios = getData();
+  const experiences = getExperiences();
+  const applications = getApplications();
+  const incomplete = portfolios.filter(v=>!(v.title && v.role && v.skills?.length && v.desc && v.result));
+  const incompleteExp = experiences.filter(v=>!(v.situation && v.action && v.result));
+  const dueApps = applications
+    .map(item=>({...item, dday:getDday(item.deadline)}))
+    .sort((a,b)=>(a.dday.days ?? 9999) - (b.dday.days ?? 9999));
+
+  const overview = createDashboardCard('오늘의 상태');
+  const overviewList = document.createElement('div');
+  overviewList.className = 'mini-list';
+  appendMiniItem(overviewList, profile.name || '인적사항 미완성', profile.target || '희망 직무를 입력해 주세요.');
+  appendMiniItem(overviewList, `포트폴리오 ${portfolios.length}개`, `자유경험 ${experiences.length}개 / 지원공고 ${applications.length}개`);
+  appendMiniItem(overviewList, `보완 필요 ${incomplete.length + incompleteExp.length}개`, '성과, 스킬, STAR 구성을 채우면 개요 품질이 좋아집니다.');
+  overview.appendChild(overviewList);
+
+  const deadlines = createDashboardCard('마감 임박 공고');
+  const deadlineList = document.createElement('div');
+  deadlineList.className = 'mini-list';
+  if(dueApps.length) dueApps.slice(0, 4).forEach(item=>appendMiniItem(deadlineList, item.description || item.link || '지원공고', item.deadline || '마감일 없음', item.dday));
+  else appendText(deadlineList, 'div', '저장된 지원공고가 없습니다.', 'empty');
+  deadlines.appendChild(deadlineList);
+
+  const needs = createDashboardCard('보완 필요한 기록');
+  const needList = document.createElement('div');
+  needList.className = 'mini-list';
+  [...incomplete.map(v=>['포트폴리오', v.title || '제목 없음']), ...incompleteExp.map(v=>['자유경험', v.title || '제목 없음'])]
+    .slice(0, 5)
+    .forEach(([kind, title])=>appendMiniItem(needList, title, `${kind} 보완 필요`));
+  if(!needList.children.length) appendText(needList, 'div', '보완 필요한 기록이 없습니다.', 'empty');
+  needs.appendChild(needList);
+
+  const quick = createDashboardCard('빠른 작업');
+  const actions = document.createElement('div');
+  actions.className = 'quick-actions';
+  [
+    ['인적사항', ()=>switchTab('profile')],
+    ['포트폴리오 추가', ()=>{switchTab('portfolio'); toggleSection('portfolioInputSection', true);}],
+    ['자유경험 추가', ()=>{switchTab('experience'); toggleSection('experienceInputSection', true);}],
+    ['지원공고 추가', ()=>{switchTab('application'); toggleSection('applicationInputSection', true);}],
+    ['자소서 도구', ()=>{
+      toggleSection('coverToolSection', true);
+      document.getElementById('coverToolSection').scrollIntoView({behavior:'smooth'});
+    }]
+  ].forEach(([label, action])=>{
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.onclick = action;
+    actions.appendChild(button);
+  });
+  quick.appendChild(actions);
+
+  container.append(overview, deadlines, needs, quick);
 }
 
 function getPortfolioBadges(v){
@@ -856,22 +1170,10 @@ function createApplicationCard(v){
   actions.querySelector('.delete').onclick = ()=>removeApplication(v.id);
   el.appendChild(actions);
 
-  appendText(el, 'h3', `${v.company || '회사명 없음'} - ${v.role || '직무 없음'}`);
-  appendText(el, 'div', `마감일: ${v.deadline || '-'} | 상태: ${v.status || '관심'}`, 'meta');
-  appendText(el, 'span', v.status || '관심', 'status-chip');
-  if(v.question) appendText(el, 'div', `문항: ${v.question}`, 'detail');
-  const draftInfo = document.createElement('div');
-  draftInfo.className = 'draft-grid';
-  const draftPanel = document.createElement('div');
-  draftPanel.className = 'analysis-panel';
-  appendText(draftPanel, 'h3', '초안');
-  appendText(draftPanel, 'div', v.draft || '아직 초안이 없습니다.', 'meta');
-  const finalPanel = document.createElement('div');
-  finalPanel.className = 'analysis-panel';
-  appendText(finalPanel, 'h3', '최종본');
-  appendText(finalPanel, 'div', v.final || '아직 최종본이 없습니다.', 'meta');
-  draftInfo.append(draftPanel, finalPanel);
-  el.appendChild(draftInfo);
+  appendText(el, 'h3', v.description || v.link || '지원공고');
+  appendText(el, 'div', `마감일: ${v.deadline || '-'}`, 'meta');
+  const dday = getDday(v.deadline);
+  appendText(el, 'span', dday.label, `dday ${dday.className}`);
   if(v.link){
     const link = appendText(el, 'a', '공고 링크 보기', 'link');
     link.href = v.link;
@@ -1244,6 +1546,7 @@ function appendKeywordList(parent, words){
 function analyzePortfolio(){
   const data = getData();
   const result = document.getElementById('analysisResult');
+  toggleSection('portfolioAnalysisSection', true);
   result.className = '';
   result.replaceChildren();
 
@@ -1317,7 +1620,7 @@ function getCombinedText(){
     profile.note,
     getPortfolioText(getData()),
     getExperienceText(getExperiences()),
-    getApplications().map(v=>[v.company, v.role, v.question, v.draft, v.final].join(' ')).join(' ')
+    getApplications().map(v=>[v.description, v.link, v.deadline].join(' ')).join(' ')
   ].join(' ').toLowerCase();
 }
 
@@ -1550,8 +1853,8 @@ function checkCompleteness(){
     ['자유경험 STAR 구성', completeExperiences.length >= 1, '상황, 행동, 결과/배운 점이 모두 있는 자유경험이 1개 이상이면 자소서 근거가 탄탄해집니다.'],
     ['중요 표시', importantCount >= 1, '자기소개서에 꼭 쓰고 싶은 경험은 별표로 표시해 주세요.'],
     ['성과 구체화', portfolios.some(v=>/\d|%|명|회|개|원|시간|개월|년/.test(v.result || '')), '성과에 숫자나 규모가 있으면 문장이 훨씬 설득력 있어집니다.']
-    ,['지원공고 저장', applications.length >= 1, '회사/직무/문항을 공고별로 저장하면 여러 지원서를 동시에 관리하기 쉽습니다.']
-    ,['최종본 저장', applications.some(v=>v.final), '문항별 최종본을 저장해 두면 제출 직전 버전을 잃어버리지 않습니다.']
+    ,['지원공고 저장', applications.length >= 1, '관심 공고 링크와 마감일을 저장하면 지원 일정을 놓치기 어렵습니다.']
+    ,['데드라인 입력', applications.some(v=>v.deadline), '마감일이 있으면 우선순위를 잡기 쉽습니다.']
   ];
 
   const done = checks.filter(([,ok])=>ok).length;
@@ -1640,10 +1943,12 @@ function renderBackupStatus(){
 
 function exportData(){
   const data = JSON.stringify({
+    profiles: getProfiles(),
+    activeProfileId: getActiveProfileId(),
     profile: getProfile(),
-    portfolio: getData(),
-    experiences: getExperiences(),
-    applications: getApplications(),
+    portfolio: readJson(STORAGE_KEY, []),
+    experiences: readJson(EXPERIENCE_KEY, []),
+    applications: readJson(APPLICATION_KEY, []),
     slideTemplate: readJson(SLIDE_TEMPLATE_KEY, 'clean')
   }, null, 2);
   const blob = new Blob([data], {type:'application/json'});
@@ -1667,10 +1972,12 @@ function importData(e){
       if(Array.isArray(parsed)){
         saveData(parsed);
       }else if(parsed && typeof parsed === 'object'){
-        if(parsed.profile && typeof parsed.profile === 'object') saveProfileData(parsed.profile);
-        if(Array.isArray(parsed.portfolio)) saveData(parsed.portfolio);
-        if(Array.isArray(parsed.experiences)) saveExperiences(parsed.experiences);
-        if(Array.isArray(parsed.applications)) saveApplications(parsed.applications);
+        if(Array.isArray(parsed.profiles)) saveProfiles(parsed.profiles);
+        if(parsed.activeProfileId) setActiveProfileId(parsed.activeProfileId);
+        if(parsed.profile && typeof parsed.profile === 'object' && !Array.isArray(parsed.profiles)) saveProfileData(parsed.profile);
+        if(Array.isArray(parsed.portfolio)) writeJson(STORAGE_KEY, parsed.portfolio);
+        if(Array.isArray(parsed.experiences)) writeJson(EXPERIENCE_KEY, parsed.experiences);
+        if(Array.isArray(parsed.applications)) writeJson(APPLICATION_KEY, parsed.applications);
         if(parsed.slideTemplate) writeJson(SLIDE_TEMPLATE_KEY, parsed.slideTemplate);
       }else{
         throw new Error('Invalid portfolio data');
@@ -1678,10 +1985,13 @@ function importData(e){
       resetForm();
       resetExperienceForm();
       resetApplicationForm();
+      ensureProfileSystem();
+      renderProfileSelector();
       renderProfile();
       renderExperiences();
       renderApplications();
       render();
+      renderDashboard();
       initSlideTemplate();
       generateCoverLetterOutline(false);
     }catch{
@@ -1697,9 +2007,12 @@ function initSlideTemplate(){
   document.getElementById('slideTemplate').value = readJson(SLIDE_TEMPLATE_KEY, 'clean');
 }
 
+ensureProfileSystem();
+renderProfileSelector();
 renderProfile();
 renderExperiences();
 renderApplications();
+renderDashboard();
 initSlideTemplate();
 renderBackupStatus();
 render();
