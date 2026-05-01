@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트폴리오 슬라이드</title>
+<style>
+:root{
+  --bg:#0f172a;
+  --slide:#f8fafc;
+  --text:#111827;
+  --muted:#64748b;
+  --line:#dbe3ee;
+  --blue:#2563eb;
+  --teal:#0f766e;
+  --amber:#b45309;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+.stage{min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;gap:16px;padding:18px}
+.topbar,.controls{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#e5e7eb}
+.topbar h1{margin:0;font-size:18px}
+.topbar a,.topbar button,.controls button{min-height:38px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:#1e293b;color:#f8fafc;padding:0 12px;text-decoration:none;font-weight:700;cursor:pointer}
+.deck-wrap{display:flex;align-items:center;justify-content:center;min-height:0}
+#deck{width:100%;display:flex;justify-content:center}
+.slide{width:min(1120px,100%);aspect-ratio:16/9;background:var(--slide);border-radius:10px;box-shadow:0 24px 80px rgba(0,0,0,.35);padding:48px;display:none;overflow:hidden}
+.slide.active{display:flex;flex-direction:column}
+.slide-title{font-size:42px;line-height:1.15;margin:0 0 18px;color:#0f172a}
+.subtitle{font-size:20px;color:var(--muted);line-height:1.5;margin:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:24px}
+.panel{border:1px solid var(--line);border-radius:10px;background:#fff;padding:20px}
+.panel h2{margin:0 0 12px;font-size:22px}
+.meta{color:var(--muted);font-size:15px;line-height:1.6}
+.big-list{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.item{border-left:5px solid var(--blue);background:#fff;border-radius:8px;padding:16px 18px}
+.item h2{margin:0 0 8px;font-size:24px}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.tag{background:#dbeafe;color:#1e3a8a;border-radius:999px;padding:6px 10px;font-size:14px;font-weight:800}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:auto}
+.kpi div{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:18px}
+.kpi strong{display:block;font-size:34px;color:var(--blue);line-height:1}
+.kpi span{display:block;margin-top:8px;color:#475569}
+.portfolio-body{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;min-height:0}
+.portfolio-body p{font-size:18px;line-height:1.65;margin:0}
+.result{margin-top:16px;border-radius:10px;background:#ecfdf5;border:1px solid #99f6e4;padding:16px;color:#134e4a;font-weight:800}
+.experience-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.step{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
+.step strong{display:block;color:var(--teal);margin-bottom:8px}
+.footer-note{margin-top:auto;color:var(--muted);font-size:14px}
+.counter{font-weight:800}
+.empty{margin:auto;text-align:center;color:#e5e7eb}
+.empty h2{font-size:28px}
+@media (max-width:760px){
+  .stage{padding:10px}
+  .slide{padding:24px;aspect-ratio:auto;min-height:70vh}
+  .slide-title{font-size:30px}
+  .grid,.portfolio-body,.experience-steps,.kpi{grid-template-columns:1fr}
+}
+@media print{
+  body{background:#fff}
+  .topbar,.controls{display:none}
+  .stage{display:block;padding:0}
+  .deck-wrap{display:block}
+  .slide{display:flex !important;box-shadow:none;border-radius:0;width:100%;height:100vh;page-break-after:always}
+}
+</style>
+</head>
+<body>
+<main class="stage">
+  <header class="topbar">
+    <h1>포트폴리오 슬라이드</h1>
+    <div>
+      <a href="index.html">관리 페이지</a>
+      <button type="button" onclick="window.print()">PDF 저장</button>
+    </div>
+  </header>
+
+  <section class="deck-wrap">
+    <div id="deck"></div>
+    <div id="empty" class="empty" hidden>
+      <h2>슬라이드로 만들 데이터가 없습니다.</h2>
+      <p>관리 페이지에서 인적사항, 포트폴리오, 자유경험을 입력해 주세요.</p>
+    </div>
+  </section>
+
+  <footer class="controls">
+    <button type="button" onclick="prevSlide()">이전</button>
+    <span class="counter" id="counter">0 / 0</span>
+    <button type="button" onclick="nextSlide()">다음</button>
+  </footer>
+</main>
+
+<script>
+const STORAGE_KEY = 'portfolio';
+const PROFILE_KEY = 'portfolioProfile';
+const EXPERIENCE_KEY = 'portfolioExperiences';
+let current = 0;
+
+function readJson(key, fallback){
+  try{
+    const parsed = JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+    return parsed ?? fallback;
+  }catch{
+    return fallback;
+  }
+}
+
+function appendText(parent, tag, text, className){
+  const el = document.createElement(tag);
+  if(className) el.className = className;
+  el.textContent = text;
+  parent.appendChild(el);
+  return el;
+}
+
+function createSlide(className = ''){
+  const slide = document.createElement('section');
+  slide.className = `slide ${className}`.trim();
+  return slide;
+}
+
+function countSkills(portfolio){
+  const counts = new Map();
+  portfolio.forEach(item=>{
+    (Array.isArray(item.skills) ? item.skills : []).forEach(skill=>{
+      if(skill) counts.set(skill, (counts.get(skill) || 0) + 1);
+    });
+  });
+  return [...counts.entries()].sort((a,b)=>b[1] - a[1]).slice(0, 8).map(([skill])=>skill);
+}
+
+function getStrengths(portfolio, experiences){
+  const text = [
+    ...portfolio.map(v=>[v.title,v.role,v.desc,v.result,(v.skills || []).join(' ')].join(' ')),
+    ...experiences.map(v=>[v.title,v.type,v.situation,v.action,v.result,(v.keywords || []).join(' ')].join(' '))
+  ].join(' ');
+  const rules = [
+    ['기획력',['기획','구성','아이디어','콘텐츠']],
+    ['실행력',['제작','진행','운영','완성','실행']],
+    ['협업력',['협업','팀','소통','조율','갈등']],
+    ['문제 해결력',['문제','해결','개선','피드백','보완']],
+    ['분석력',['분석','성과','결과','데이터','조회수']],
+    ['책임감',['책임','마감','관리','꾸준','담당']]
+  ];
+  return rules
+    .map(([name, words])=>({name, score: words.reduce((sum, word)=>sum + (text.includes(word) ? 1 : 0), 0)}))
+    .filter(v=>v.score > 0)
+    .sort((a,b)=>b.score - a.score)
+    .slice(0, 5)
+    .map(v=>v.name);
+}
+
+function addTags(parent, words){
+  const tags = document.createElement('div');
+  tags.className = 'tags';
+  words.filter(Boolean).forEach(word=>appendText(tags, 'span', word, 'tag'));
+  parent.appendChild(tags);
+}
+
+function buildSlides(){
+  const profile = readJson(PROFILE_KEY, {});
+  const portfolio = readJson(STORAGE_KEY, []);
+  const experiences = readJson(EXPERIENCE_KEY, []);
+  const importantPortfolio = portfolio.filter(v=>v.important).concat(portfolio.filter(v=>!v.important)).slice(0, 5);
+  const importantExperiences = experiences.filter(v=>v.important).concat(experiences.filter(v=>!v.important)).slice(0, 3);
+  const deck = document.getElementById('deck');
+  deck.replaceChildren();
+
+  if(!Object.values(profile).some(Boolean) && !portfolio.length && !experiences.length){
+    document.getElementById('empty').hidden = false;
+    return [];
+  }
+
+  const slides = [];
+  const cover = createSlide();
+  appendText(cover, 'h2', profile.name || 'My Portfolio', 'slide-title');
+  appendText(cover, 'p', profile.target || '지원 직무와 연결되는 경험 포트폴리오', 'subtitle');
+  appendText(cover, 'p', profile.note || '기록된 경험을 바탕으로 강점과 성장 방향을 정리했습니다.', 'footer-note');
+  slides.push(cover);
+
+  const profileSlide = createSlide();
+  appendText(profileSlide, 'h2', 'Profile', 'slide-title');
+  const profileGrid = document.createElement('div');
+  profileGrid.className = 'grid';
+  [
+    ['학력', profile.education || '-'],
+    ['전공 / 관심 분야', profile.major || '-'],
+    ['희망 직무', profile.target || '-'],
+    ['연락처', [profile.email, profile.phone].filter(Boolean).join(' / ') || '-']
+  ].forEach(([label, value])=>{
+    const panel = document.createElement('div');
+    panel.className = 'panel';
+    appendText(panel, 'h2', label);
+    appendText(panel, 'div', value, 'meta');
+    profileGrid.appendChild(panel);
+  });
+  profileSlide.appendChild(profileGrid);
+  slides.push(profileSlide);
+
+  const summary = createSlide();
+  appendText(summary, 'h2', 'Strength Snapshot', 'slide-title');
+  const strengths = getStrengths(portfolio, experiences);
+  addTags(summary, strengths.length ? strengths : ['성장 가능성','책임감','실행력']);
+  const kpi = document.createElement('div');
+  kpi.className = 'kpi';
+  [
+    [portfolio.length, '포트폴리오 기록'],
+    [experiences.length, '자유경험 기록'],
+    [countSkills(portfolio).length, '스킬 키워드']
+  ].forEach(([value, label])=>{
+    const item = document.createElement('div');
+    appendText(item, 'strong', String(value));
+    appendText(item, 'span', label);
+    kpi.appendChild(item);
+  });
+  summary.appendChild(kpi);
+  slides.push(summary);
+
+  importantPortfolio.forEach(item=>{
+    const slide = createSlide();
+    appendText(slide, 'h2', item.title || 'Portfolio', 'slide-title');
+    appendText(slide, 'p', `${item.category || '분류 없음'} | ${item.dateStart || '-'} ~ ${item.dateEnd || '-'}`, 'subtitle');
+    const body = document.createElement('div');
+    body.className = 'portfolio-body';
+    const left = document.createElement('div');
+    appendText(left, 'p', item.desc || '설명이 없습니다.');
+    if(item.result) appendText(left, 'div', `성과: ${item.result}`, 'result');
+    const right = document.createElement('div');
+    right.className = 'panel';
+    appendText(right, 'h2', 'Role & Skills');
+    appendText(right, 'div', item.role || '역할 미입력', 'meta');
+    addTags(right, item.skills || []);
+    body.append(left, right);
+    slide.appendChild(body);
+    slides.push(slide);
+  });
+
+  importantExperiences.forEach(item=>{
+    const slide = createSlide();
+    appendText(slide, 'h2', item.title || 'Experience', 'slide-title');
+    appendText(slide, 'p', `${item.type || '경험'} | ${item.date || '-'}`, 'subtitle');
+    addTags(slide, item.keywords || []);
+    const steps = document.createElement('div');
+    steps.className = 'experience-steps';
+    [
+      ['상황', item.situation || '-'],
+      ['행동', item.action || '-'],
+      ['결과/배운 점', item.result || '-']
+    ].forEach(([label, value])=>{
+      const step = document.createElement('div');
+      step.className = 'step';
+      appendText(step, 'strong', label);
+      appendText(step, 'div', value, 'meta');
+      steps.appendChild(step);
+    });
+    slide.appendChild(steps);
+    slides.push(slide);
+  });
+
+  const closing = createSlide();
+  appendText(closing, 'h2', 'Closing', 'slide-title');
+  appendText(closing, 'p', `${profile.target || '지원 분야'}에서 지금까지 쌓은 경험을 더 구체적인 성과로 확장하겠습니다.`, 'subtitle');
+  appendText(closing, 'p', '기록된 포트폴리오와 자유경험은 저의 실행 과정, 협업 태도, 성장 방향을 보여주는 근거입니다.', 'footer-note');
+  slides.push(closing);
+
+  slides.forEach(slide=>deck.appendChild(slide));
+  return slides;
+}
+
+function showSlide(index){
+  const slides = [...document.querySelectorAll('.slide')];
+  if(!slides.length) return;
+  current = (index + slides.length) % slides.length;
+  slides.forEach((slide, i)=>slide.classList.toggle('active', i === current));
+  document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+}
+
+function nextSlide(){showSlide(current + 1)}
+function prevSlide(){showSlide(current - 1)}
+
+document.addEventListener('keydown', event=>{
+  if(event.key === 'ArrowRight') nextSlide();
+  if(event.key === 'ArrowLeft') prevSlide();
+});
+
+const slides = buildSlides();
+showSlide(0);
+</script>
+</body>
+</html>
