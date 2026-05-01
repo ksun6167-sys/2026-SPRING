@@ -17,6 +17,8 @@
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+body.template-media{--bg:#18181b;--blue:#be123c;--teal:#7c3aed;--amber:#ea580c}
+body.template-report{--bg:#1f2937;--blue:#0f766e;--teal:#0369a1;--amber:#854d0e}
 .stage{min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;gap:16px;padding:18px}
 .topbar,.controls{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#e5e7eb}
 .topbar h1{margin:0;font-size:18px}
@@ -94,6 +96,8 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 const STORAGE_KEY = 'portfolio';
 const PROFILE_KEY = 'portfolioProfile';
 const EXPERIENCE_KEY = 'portfolioExperiences';
+const APPLICATION_KEY = 'portfolioApplications';
+const SLIDE_TEMPLATE_KEY = 'portfolioSlideTemplate';
 let current = 0;
 
 function readJson(key, fallback){
@@ -158,9 +162,12 @@ function addTags(parent, words){
 }
 
 function buildSlides(){
+  const template = readJson(SLIDE_TEMPLATE_KEY, 'clean');
+  document.body.classList.add(`template-${template}`);
   const profile = readJson(PROFILE_KEY, {});
   const portfolio = readJson(STORAGE_KEY, []);
   const experiences = readJson(EXPERIENCE_KEY, []);
+  const applications = readJson(APPLICATION_KEY, []);
   const importantPortfolio = portfolio.filter(v=>v.important).concat(portfolio.filter(v=>!v.important)).slice(0, 5);
   const importantExperiences = experiences.filter(v=>v.important).concat(experiences.filter(v=>!v.important)).slice(0, 3);
   const deck = document.getElementById('deck');
@@ -215,6 +222,23 @@ function buildSlides(){
   });
   summary.appendChild(kpi);
   slides.push(summary);
+
+  if(applications.length){
+    const appSlide = createSlide();
+    appendText(appSlide, 'h2', 'Application Tracker', 'slide-title');
+    const list = document.createElement('div');
+    list.className = 'big-list';
+    applications.slice(0, 4).forEach(item=>{
+      const row = document.createElement('div');
+      row.className = 'item';
+      appendText(row, 'h2', `${item.company || '회사'} - ${item.role || '직무'}`);
+      appendText(row, 'div', `상태: ${item.status || '관심'} | 마감일: ${item.deadline || '-'}`, 'meta');
+      if(item.question) appendText(row, 'div', item.question, 'meta');
+      list.appendChild(row);
+    });
+    appSlide.appendChild(list);
+    slides.push(appSlide);
+  }
 
   importantPortfolio.forEach(item=>{
     const slide = createSlide();
