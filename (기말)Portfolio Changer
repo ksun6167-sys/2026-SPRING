@@ -28,6 +28,11 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 .onboarding-step{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
 .onboarding-step label{font-weight:800}
 .app-shell[hidden]{display:none}
+.wizard-card{border:1px solid var(--line);border-radius:8px;background:#fafafa;padding:14px;margin-bottom:12px}
+.wizard-question{font-size:18px;font-weight:800;margin:0 0 10px}
+.wizard-progress{font-size:13px;color:var(--muted);margin-bottom:10px}
+.wizard-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.detail-form.collapsed{display:none}
 .container{max-width:1040px;margin:0 auto;padding:28px 18px 40px}
 h1{text-align:center;margin:0 0 22px;font-size:28px}
 .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:18px}
@@ -133,7 +138,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .quick-actions{display:flex;gap:8px;flex-wrap:wrap}
 .mini-list{display:flex;flex-direction:column;gap:8px}
 .mini-item{border:1px solid var(--line);border-radius:8px;background:#fafafa;padding:10px}
+button.mini-item{min-height:0;font:inherit;font-weight:400}
 .mini-item strong{display:block;margin-bottom:4px}
+.progress-wrap{margin:8px 0 14px}
+.progress-label{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:13px;color:#4b5563;font-weight:800}
+.progress-track{height:14px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#10b981)}
 .dday{display:inline-flex;border-radius:999px;padding:4px 9px;font-size:12px;font-weight:800}
 .dday-ok{background:#dcfce7;color:#166534}
 .dday-soon{background:#fef3c7;color:#92400e}
@@ -233,7 +243,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
     </div>
     <div class="collapsible-body">
     <p class="notice" id="formStatus">새 기록을 추가하는 중입니다.</p>
-    <div class="form-grid">
+    <div id="portfolioWizard" class="wizard-card">
+      <div id="wizardProgress" class="wizard-progress"></div>
+      <p id="wizardQuestion" class="wizard-question"></p>
+      <input id="wizardAnswer" autocomplete="off">
+      <div class="wizard-actions">
+        <button type="button" class="dark" onclick="prevWizardStep()">이전</button>
+        <button type="button" onclick="nextWizardStep()">다음</button>
+        <button type="button" onclick="finishWizard()">바로 저장</button>
+        <button type="button" class="collapse-toggle" onclick="toggleDetailForm()">상세 입력 보기</button>
+      </div>
+    </div>
+    <div id="portfolioDetailForm" class="form-grid detail-form collapsed">
       <input id="title" placeholder="제목" autocomplete="off">
       <select id="category">
         <option value="영상">영상</option>
@@ -431,6 +452,17 @@ const fields = {
   result: document.getElementById('result'),
   link: document.getElementById('link')
 };
+
+const wizardSteps = [
+  {field:'title', question:'무슨 활동이나 프로젝트였나요?', placeholder:'예: 유튜브 숏폼 콘텐츠 제작'},
+  {field:'category', question:'어떤 종류의 경험인가요?', placeholder:'영상 / 대외활동 / 알바 / 학업'},
+  {field:'role', question:'그 안에서 맡은 역할은 무엇이었나요?', placeholder:'예: 기획, 촬영, 편집 담당'},
+  {field:'skills', question:'사용한 스킬이나 도구가 있나요?', placeholder:'예: Premiere Pro, 기획, 촬영'},
+  {field:'desc', question:'무엇을 했는지 간단히 설명해 주세요.', placeholder:'활동 배경과 진행 내용을 적어주세요.'},
+  {field:'result', question:'성과나 배운 점은 무엇인가요?', placeholder:'가능하면 숫자나 변화도 적어주세요.'},
+  {field:'link', question:'관련 링크가 있나요?', placeholder:'없으면 비워두고 다음으로 넘어가세요.'}
+];
+let wizardStep = 0;
 
 const profileFields = {
   name: document.getElementById('profileName'),
@@ -738,6 +770,73 @@ function saveProfile(){
   generateCoverLetterOutline(false);
 }
 
+function getWizardField(){
+  return wizardSteps[wizardStep].field;
+}
+
+function syncWizardAnswerToField(){
+  const step = wizardSteps[wizardStep];
+  const value = document.getElementById('wizardAnswer').value.trim();
+  if(step.field === 'category'){
+    const allowed = ['영상','대외활동','알바','학업'];
+    fields.category.value = allowed.includes(value) ? value : fields.category.value;
+  }else{
+    fields[step.field].value = value;
+  }
+}
+
+function syncFieldToWizardAnswer(){
+  const step = wizardSteps[wizardStep];
+  document.getElementById('wizardAnswer').value = fields[step.field].value || '';
+}
+
+function renderWizard(){
+  const step = wizardSteps[wizardStep];
+  document.getElementById('wizardProgress').textContent = `${wizardStep + 1} / ${wizardSteps.length}`;
+  document.getElementById('wizardQuestion').textContent = step.question;
+  document.getElementById('wizardAnswer').placeholder = step.placeholder;
+  syncFieldToWizardAnswer();
+}
+
+function nextWizardStep(){
+  syncWizardAnswerToField();
+  if(wizardStep < wizardSteps.length - 1){
+    wizardStep += 1;
+    renderWizard();
+  }else{
+    finishWizard();
+  }
+}
+
+function prevWizardStep(){
+  syncWizardAnswerToField();
+  if(wizardStep > 0){
+    wizardStep -= 1;
+    renderWizard();
+  }
+}
+
+function finishWizard(){
+  syncWizardAnswerToField();
+  add();
+}
+
+function resetWizard(){
+  wizardStep = 0;
+  renderWizard();
+}
+
+function toggleDetailForm(){
+  document.getElementById('portfolioDetailForm').classList.toggle('collapsed');
+}
+
+document.getElementById('wizardAnswer').addEventListener('keydown', event=>{
+  if(event.key === 'Enter'){
+    event.preventDefault();
+    nextWizardStep();
+  }
+});
+
 function renderProfile(){
   const profile = getProfile();
   Object.entries(profileFields).forEach(([key, field])=>{
@@ -794,6 +893,9 @@ function getFormItem(previous){
 }
 
 function add(){
+  if(document.activeElement && document.activeElement.id === 'wizardAnswer'){
+    syncWizardAnswerToField();
+  }
   const data = getData();
   const previous = editId ? data.find(v=>v.id === editId) : null;
   const item = getFormItem(previous);
@@ -828,6 +930,8 @@ function resetForm(){
   editId = null;
   document.getElementById('saveButton').textContent = '추가';
   document.getElementById('formStatus').textContent = '새 기록을 추가하는 중입니다.';
+  document.getElementById('portfolioDetailForm').classList.add('collapsed');
+  resetWizard();
 }
 
 function editItem(id){
@@ -845,6 +949,9 @@ function editItem(id){
   editId = id;
   document.getElementById('saveButton').textContent = '수정 저장';
   document.getElementById('formStatus').textContent = `"${v.title}" 기록을 수정하는 중입니다.`;
+  document.getElementById('portfolioDetailForm').classList.remove('collapsed');
+  wizardStep = 0;
+  renderWizard();
   toggleSection('portfolioInputSection', true);
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1062,6 +1169,54 @@ function createDashboardCard(title){
   return card;
 }
 
+function getCompletionScore(profile, portfolios, experiences, applications){
+  const checks = [
+    Boolean(profile.name),
+    Boolean(profile.target || profile.major),
+    Boolean(profile.note),
+    portfolios.length >= 1,
+    portfolios.some(v=>v.title && v.role && v.skills?.length && v.desc && v.result),
+    portfolios.some(v=>/\d|%|명|회|개|원|시간|개월|년/.test(v.result || '')),
+    experiences.length >= 1,
+    experiences.some(v=>v.situation && v.action && v.result),
+    applications.length >= 1,
+    applications.some(v=>v.deadline)
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+function appendProgress(parent, score){
+  const wrap = document.createElement('div');
+  wrap.className = 'progress-wrap';
+  const label = document.createElement('div');
+  label.className = 'progress-label';
+  appendText(label, 'span', '준비 완성률');
+  appendText(label, 'span', `${score}%`);
+  const track = document.createElement('div');
+  track.className = 'progress-track';
+  const fill = document.createElement('div');
+  fill.className = 'progress-fill';
+  fill.style.width = `${score}%`;
+  track.appendChild(fill);
+  wrap.append(label, track);
+  parent.appendChild(wrap);
+}
+
+function getTodayTasks(profile, portfolios, experiences, applications, incomplete, incompleteExp, dueApps){
+  const tasks = [];
+  if(!profile.name) tasks.push(['인적사항 이름 입력하기', '처음 시작하려면 이름부터 저장해 주세요.', ()=>switchTab('profile')]);
+  if(!profile.target) tasks.push(['희망 직무 입력하기', '대시보드와 자소서 개요가 더 정확해집니다.', ()=>switchTab('profile')]);
+  if(!portfolios.length) tasks.push(['포트폴리오 1개 추가하기', '대표 활동 하나만 기록해도 PPT와 개요가 만들어집니다.', ()=>{switchTab('portfolio'); toggleSection('portfolioInputSection', true);}]);
+  if(incomplete.length) tasks.push(['포트폴리오 성과 보완하기', `${incomplete[0].title || '제목 없는 기록'}에 역할/스킬/성과를 채워보세요.`, ()=>{switchTab('portfolio'); editItem(incomplete[0].id); }]);
+  if(!experiences.length) tasks.push(['자유경험 1개 추가하기', '협업, 도전, 실패 경험 중 하나만 적어도 자소서 재료가 됩니다.', ()=>{switchTab('experience'); toggleSection('experienceInputSection', true);}]);
+  if(incompleteExp.length) tasks.push(['자유경험 STAR 채우기', `${incompleteExp[0].title || '자유경험'}에 상황/행동/결과를 채워보세요.`, ()=>{switchTab('experience'); editExperience(incompleteExp[0].id); }]);
+  const urgent = dueApps.find(item=>item.dday.days !== null && item.dday.days <= 3 && item.dday.days >= 0);
+  if(urgent) tasks.push(['마감 임박 공고 확인하기', `${urgent.description || '지원공고'}: ${urgent.dday.label}`, ()=>switchTab('application')]);
+  if(!applications.length) tasks.push(['관심 공고 저장하기', '링크와 마감일만 저장해도 D-day 관리가 됩니다.', ()=>{switchTab('application'); toggleSection('applicationInputSection', true);}]);
+  tasks.push(['자기소개서 개요 생성하기', '기록된 재료로 문항 맞춤 개요를 확인해 보세요.', ()=>{toggleSection('coverToolSection', true); document.getElementById('coverToolSection').scrollIntoView({behavior:'smooth'});}]);
+  return tasks.slice(0, 3);
+}
+
 function renderDashboard(){
   const container = document.getElementById('dashboard');
   if(!container) return;
@@ -1076,8 +1231,11 @@ function renderDashboard(){
   const dueApps = applications
     .map(item=>({...item, dday:getDday(item.deadline)}))
     .sort((a,b)=>(a.dday.days ?? 9999) - (b.dday.days ?? 9999));
+  const completion = getCompletionScore(profile, portfolios, experiences, applications);
+  const todayTasks = getTodayTasks(profile, portfolios, experiences, applications, incomplete, incompleteExp, dueApps);
 
   const overview = createDashboardCard('오늘의 상태');
+  appendProgress(overview, completion);
   const overviewList = document.createElement('div');
   overviewList.className = 'mini-list';
   appendMiniItem(overviewList, profile.name || '인적사항 미완성', profile.target || '희망 직무를 입력해 주세요.');
@@ -1101,6 +1259,23 @@ function renderDashboard(){
   if(!needList.children.length) appendText(needList, 'div', '보완 필요한 기록이 없습니다.', 'empty');
   needs.appendChild(needList);
 
+  const tasks = createDashboardCard('오늘의 추천 작업');
+  const taskList = document.createElement('div');
+  taskList.className = 'mini-list';
+  todayTasks.forEach(([title, meta, action])=>{
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'mini-item';
+    item.style.textAlign = 'left';
+    item.style.color = 'inherit';
+    item.style.cursor = 'pointer';
+    item.onclick = action;
+    appendText(item, 'strong', title);
+    appendText(item, 'div', meta, 'meta');
+    taskList.appendChild(item);
+  });
+  tasks.appendChild(taskList);
+
   const quick = createDashboardCard('빠른 작업');
   const actions = document.createElement('div');
   actions.className = 'quick-actions';
@@ -1122,7 +1297,7 @@ function renderDashboard(){
   });
   quick.appendChild(actions);
 
-  container.append(overview, deadlines, needs, quick);
+  container.append(overview, tasks, deadlines, needs, quick);
 }
 
 function getPortfolioBadges(v){
@@ -2095,6 +2270,7 @@ initSlideTemplate();
 renderBackupStatus();
 render();
 renderOnboarding();
+resetWizard();
 </script>
 </body>
 </html>
