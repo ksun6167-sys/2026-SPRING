@@ -20,6 +20,14 @@
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+.onboarding{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#eef2ff,#f8fafc)}
+.onboarding[hidden]{display:none}
+.onboarding-card{width:min(620px,100%);background:#fff;border:1px solid var(--line);border-radius:12px;padding:28px;box-shadow:0 24px 70px rgba(15,23,42,.12)}
+.onboarding-card h1{margin:0 0 8px;text-align:left;font-size:30px}
+.onboarding-card p{margin:0 0 20px;color:var(--muted);line-height:1.6}
+.onboarding-step{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.onboarding-step label{font-weight:800}
+.app-shell[hidden]{display:none}
 .container{max-width:1040px;margin:0 auto;padding:28px 18px 40px}
 h1{text-align:center;margin:0 0 22px;font-size:28px}
 .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:18px}
@@ -148,7 +156,30 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 </style>
 </head>
 <body>
-<main class="container">
+<section id="onboarding" class="onboarding" hidden>
+  <div class="onboarding-card">
+    <h1>처음 시작하기</h1>
+    <p>먼저 인적사항을 하나 만들게요. 답변은 나중에 언제든 수정할 수 있습니다.</p>
+    <div class="onboarding-step">
+      <label for="onboardName">이름이 무엇인가요?</label>
+      <input id="onboardName" placeholder="이름" autocomplete="off">
+    </div>
+    <div class="onboarding-step">
+      <label for="onboardTarget">어떤 분야를 준비하고 있나요?</label>
+      <input id="onboardTarget" placeholder="예: 콘텐츠 마케팅, 영상 편집, 서비스 기획" autocomplete="off">
+    </div>
+    <div class="onboarding-step">
+      <label for="onboardPurpose">이 포트폴리오를 어떤 목적으로 쓰고 싶나요?</label>
+      <textarea id="onboardPurpose" placeholder="예: 대외활동 지원, 인턴 지원, 자기소개서 정리"></textarea>
+    </div>
+    <div class="toolbar" style="margin:0">
+      <button type="button" onclick="completeOnboarding()">시작하기</button>
+      <button type="button" class="dark" onclick="skipOnboarding()">나중에 입력</button>
+    </div>
+  </div>
+</section>
+
+<main id="appShell" class="container app-shell">
   <h1>자기소개서 포트폴리오 관리</h1>
 
   <section class="profile-switcher" aria-label="현재 인적사항 선택">
@@ -384,6 +415,7 @@ const EXPERIENCE_KEY = 'portfolioExperiences';
 const APPLICATION_KEY = 'portfolioApplications';
 const BACKUP_KEY = 'portfolioBackupAt';
 const SLIDE_TEMPLATE_KEY = 'portfolioSlideTemplate';
+const ONBOARDING_DONE_KEY = 'portfolioOnboardingDone';
 let editId = null;
 let experienceEditId = null;
 let applicationEditId = null;
@@ -481,7 +513,7 @@ function ensureProfileSystem(){
     const id = makeId('profile');
     const profile = {
       id,
-      name: oldProfile.name || '기본 인적사항',
+      name: oldProfile.name || '',
       birth: oldProfile.birth || '',
       education: oldProfile.education || '',
       major: oldProfile.major || '',
@@ -503,6 +535,52 @@ function ensureProfileSystem(){
   if(!getActiveProfileId() || !profiles.some(profile=>profile.id === getActiveProfileId())){
     setActiveProfileId(profiles[0].id);
   }
+}
+
+function shouldShowOnboarding(){
+  if(localStorage.getItem(ONBOARDING_DONE_KEY) === 'true') return false;
+  const profile = getActiveProfile();
+  const hasName = profile.name && profile.name !== '기본 인적사항';
+  const hasRecords = getData().length || getExperiences().length || getApplications().length;
+  return !hasName && !hasRecords;
+}
+
+function renderOnboarding(){
+  const onboarding = document.getElementById('onboarding');
+  const shell = document.getElementById('appShell');
+  const show = shouldShowOnboarding();
+  onboarding.hidden = !show;
+  shell.hidden = show;
+  if(show) document.getElementById('onboardName').focus();
+}
+
+function completeOnboarding(){
+  const name = document.getElementById('onboardName').value.trim();
+  const target = document.getElementById('onboardTarget').value.trim();
+  const purpose = document.getElementById('onboardPurpose').value.trim();
+  if(!name){
+    alert('이름을 입력해 주세요.');
+    document.getElementById('onboardName').focus();
+    return;
+  }
+  const activeId = getActiveProfileId();
+  const profiles = getProfiles().map(profile=>profile.id === activeId
+    ? {...profile, name, target, note: purpose}
+    : profile);
+  saveProfiles(profiles);
+  writeJson(PROFILE_KEY, {...getActiveProfile(), name, target, note: purpose});
+  localStorage.setItem(ONBOARDING_DONE_KEY, 'true');
+  renderProfileSelector();
+  renderProfile();
+  renderDashboard();
+  renderOnboarding();
+  switchTab('dashboard');
+}
+
+function skipOnboarding(){
+  localStorage.setItem(ONBOARDING_DONE_KEY, 'true');
+  renderOnboarding();
+  switchTab('profile');
 }
 
 function getActiveProfile(){
@@ -2016,6 +2094,7 @@ renderDashboard();
 initSlideTemplate();
 renderBackupStatus();
 render();
+renderOnboarding();
 </script>
 </body>
 </html>
